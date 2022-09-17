@@ -18,24 +18,27 @@
 
 /* exported init */
 
-const GETTEXT_DOMAIN = 'my-indicator-extension';
-
 const { GObject, St } = imports.gi;
+const Gettext = imports.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+
+const Domain = Gettext.domain(Me.metadata.uuid);
+const _ = Domain.gettext;
+const ngettext = Domain.ngettext;
+
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
-const _ = ExtensionUtils.gettext;
-
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
     _init() {
-        super._init(0.0, _('My Shiny Indicator'));
+        super._init(0.0, _(`${Me.metadata.name} Indicator`));
 
         this.add_child(new St.Icon({
-            icon_name: 'face-smile-symbolic',
+            icon_name: 'org.gnome.Calculator-symbolic',
             style_class: 'system-status-icon',
         }));
 
@@ -51,7 +54,7 @@ class Extension {
     constructor(uuid) {
         this._uuid = uuid;
 
-        ExtensionUtils.initTranslations(GETTEXT_DOMAIN);
+        ExtensionUtils.initTranslations(Me.metadata.uuid);
     }
 
     enable() {
