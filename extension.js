@@ -42,11 +42,60 @@ class Indicator extends PanelMenu.Button {
             style_class: 'system-status-icon',
         }));
 
-        let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
-        item.connect('activate', () => {
-            Main.notify(_('Whatʼs up, folks?'));
+//        let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
+//        item.connect('activate', () => {
+//            Main.notify(_('Whatʼs up, folks?'));
+//        });
+//        this.menu.addMenuItem(item);
+
+//-- Init display controls
+
+        let displayArea = new PopupMenu.PopupBaseMenuItem({
+            reactive: false/*,
+            style_class: 'openweather-menu-button-container'*/
         });
-        this.menu.addMenuItem(item);
+
+        let displayBox = new St.BoxLayout({
+            vertical: true,
+            x_expand: true,
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER/*,
+            style_class: 'system-menu-action openweather-current-summarybox'*/
+        });
+
+//-- Insert controls
+//        displayBox.add_actor(!);
+        this._display = new St.Entry();
+        displayBox.add_actor(this._display);
+
+        displayArea.actor.add_child(displayBox);
+
+//-- Init keyboard controls
+
+        let keyboardArea = new PopupMenu.PopupBaseMenuItem({
+            reactive: false/*,
+            style_class: 'openweather-menu-button-container'*/
+        });
+        
+        let keyboardBox = new St.BoxLayout({
+            vertical: true,
+            x_expand: true,
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER/*,
+            style_class: 'system-menu-action openweather-current-summarybox'*/
+        });
+
+//-- Insert controls
+//        keyboardBox.add_actor(!);
+
+        keyboardArea.actor.add_child(keyboardBox);
+
+//-- Init Popup
+
+        this.menu.addMenuItem(displayArea);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addMenuItem(keyboardArea);
+
     }
 });
 
