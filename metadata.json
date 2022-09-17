@@ -1,0 +1,8 @@
+{
+  "name": "Panel Calculator (RPN)",
+  "description": "Calculator on panel with reverse polish notation",
+  "uuid": "gse.panel-calc-rpn@tyukh.github.io",
+  "shell-version": [
+    "42"
+  ]
+}
