@@ -18,7 +18,7 @@
 
 /* exported init */
 
-const { GObject, St } = imports.gi;
+const { GObject, St, Clutter, Pango } = imports.gi;
 const Gettext = imports.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -42,18 +42,13 @@ class Indicator extends PanelMenu.Button {
             style_class: 'system-status-icon',
         }));
 
-//        let item = new PopupMenu.PopupMenuItem(_('Show Notification'));
-//        item.connect('activate', () => {
-//            Main.notify(_('Whatʼs up, folks?'));
-//        });
-//        this.menu.addMenuItem(item);
-
 //-- Init display controls
 
         let displayArea = new PopupMenu.PopupBaseMenuItem({
             reactive: false/*,
             style_class: 'openweather-menu-button-container'*/
         });
+        displayArea.setOrnament(PopupMenu.Ornament.HIDDEN);
 
         let displayBox = new St.BoxLayout({
             vertical: true,
@@ -65,7 +60,18 @@ class Indicator extends PanelMenu.Button {
 
 //-- Insert controls
 //        displayBox.add_actor(!);
-        this._display = new St.Entry();
+        this._display = new St.Entry({
+            text: "0\n0\n10.1\n13.5\n0",
+            x_expand: true,
+            y_expand: true, 
+            x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.FILL
+        });
+        
+        this._display.get_clutter_text().set_single_line_mode(false);
+        this._display.get_clutter_text().set_justify(false);        
+        this._display.get_clutter_text().set_line_alignment(Pango.Alignment.RIGHT);
+        
         displayBox.add_actor(this._display);
 
         displayArea.actor.add_child(displayBox);
@@ -76,6 +82,7 @@ class Indicator extends PanelMenu.Button {
             reactive: false/*,
             style_class: 'openweather-menu-button-container'*/
         });
+        keyboardArea.setOrnament(PopupMenu.Ornament.HIDDEN);
         
         let keyboardBox = new St.BoxLayout({
             vertical: true,
