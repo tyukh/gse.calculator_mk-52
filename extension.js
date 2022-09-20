@@ -31,6 +31,7 @@ const ngettext = Domain.ngettext;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Processor = Me.imports.processor;
 
 const Indicator = GObject.registerClass(
     class Indicator extends PanelMenu.Button {
@@ -96,13 +97,14 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-stackBoxLayout'
                 });
 
-                x1StackBox.add_actor(new St.Label({
-                    text: "0",
+                this._x1Indicator = new St.Label({
+                    text: "",
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
                     style_class: 'panel-calc-rpn-stackValueLabel'
-                }));
+                });
+                x1StackBox.add_actor(this._x1Indicator);
                 x1StackBox.add_actor(new St.Label({
                     text: ":X₁",
                     x_align: Clutter.ActorAlign.END,
@@ -110,13 +112,14 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
-                tStackBox.add_actor(new St.Label({
-                    text: "0",
+                this._tIndicator = new St.Label({
+                    text: "",
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
                     style_class: 'panel-calc-rpn-stackValueLabel'
-                }));
+                });
+                tStackBox.add_actor(this._tIndicator);
                 tStackBox.add_actor(new St.Label({
                     text: ":T",
                     x_align: Clutter.ActorAlign.END,
@@ -124,13 +127,14 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
-                zStackBox.add_actor(new St.Label({
-                    text: "0",
+                this._zIndicator = new St.Label({
+                    text: "",
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
                     style_class: 'panel-calc-rpn-stackValueLabel'
-                }));
+                });
+                zStackBox.add_actor(this._zIndicator);
                 zStackBox.add_actor(new St.Label({
                     text: ":Z",
                     x_align: Clutter.ActorAlign.END,
@@ -138,13 +142,14 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
-                yStackBox.add_actor(new St.Label({
-                    text: "0",
+                this._yIndicator = new St.Label({
+                    text: "",
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
                     style_class: 'panel-calc-rpn-stackValueLabel'
-                }));
+                });
+                yStackBox.add_actor(this._yIndicator);
                 yStackBox.add_actor(new St.Label({
                     text: ":Y",
                     x_align: Clutter.ActorAlign.END,
@@ -188,17 +193,15 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-stackBoxLayout'
                 });
 
-                this._register = new St.Label({
-                    text: "0",
+                this._xIndicator = new St.Label({
+                    text: "",
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
                     style_class: 'panel-calc-rpn-stackValueLabel'
                 });
-//                this._register.get_clutter_text().set_justify(true);
-//                this._register.get_clutter_text().set_line_alignment(Pango.Alignment.RIGHT);
 
-                xStackBox.add_actor(this._register);
+                xStackBox.add_actor(this._xIndicator);
                 xStackBox.add_actor(new St.Label({
                     text: ":X",
                     x_align: Clutter.ActorAlign.END,
@@ -411,7 +414,18 @@ const Indicator = GObject.registerClass(
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(keyboardArea);
 
+            this._processor = new Processor.Processor();
+            this._refreshIndicators();
         }
+
+        _refreshIndicators() { 
+            this._xIndicator.set_text(this._processor.getX());
+            this._yIndicator.set_text(this._processor.getY());
+            this._zIndicator.set_text(this._processor.getZ());
+            this._tIndicator.set_text(this._processor.getT());
+            this._x1Indicator.set_text(this._processor.getX1());
+        }
+
     });
 
 class Extension {
