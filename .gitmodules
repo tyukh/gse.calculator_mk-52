@@ -1,0 +1,3 @@
+[submodule "decimal"]
+	path = decimal
+	url = https://github.com/MikeMcl/decimal.js
