@@ -42,21 +42,29 @@ const Indicator = GObject.registerClass(
                 style_class: 'system-status-icon',
             }));
 
-            //-- Init display controls
+            //-- Init controls
 
-            //-- Init stack display
-            let stackArea = new PopupMenu.PopupSubMenuMenuItem(_("Stack"), false);
-            stackArea.setOrnament(PopupMenu.Ornament.HIDDEN);
+            //-- Init Indicator display
+            let indicatorSArea = new PopupMenu.PopupSubMenuMenuItem(_("Stack"), false);
+            indicatorSArea.setOrnament(PopupMenu.Ornament.HIDDEN);
 
-            //-- Insert stack display controls
+            //-- Insert Indicator controls
             {
-                let stackBox = new St.BoxLayout({
+                let indicator1Box = new St.BoxLayout({
                     vertical: true,
                     x_expand: true,
                     y_expand: true,
                     y_align: Clutter.ActorAlign.CENTER,
                     opacity: 150,
-                    style_class: 'panel-calc-rpn-displayBoxLayout'
+                    style_class: 'panel-calc-rpn-indicator0BoxLayout'
+                });
+                let indicator2Box = new St.BoxLayout({
+                    vertical: true,
+                    x_expand: true,
+                    y_expand: true,
+                    y_align: Clutter.ActorAlign.CENTER,
+                    opacity: 150,
+                    style_class: 'panel-calc-rpn-indicatorBoxLayout'
                 });
 
                 let x1StackBox = new St.BoxLayout({
@@ -93,13 +101,13 @@ const Indicator = GObject.registerClass(
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
-                    style_class: 'panel-calc-rpn-displayLabel'
+                    style_class: 'panel-calc-rpn-stackValueLabel'
                 }));
                 x1StackBox.add_actor(new St.Label({
                     text: ":X₁",
                     x_align: Clutter.ActorAlign.END,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayNameLabel'
+                    style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
                 tStackBox.add_actor(new St.Label({
@@ -107,13 +115,13 @@ const Indicator = GObject.registerClass(
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
-                    style_class: 'panel-calc-rpn-displayLabel'
+                    style_class: 'panel-calc-rpn-stackValueLabel'
                 }));
                 tStackBox.add_actor(new St.Label({
                     text: ":T",
                     x_align: Clutter.ActorAlign.END,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayNameLabel'
+                    style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
                 zStackBox.add_actor(new St.Label({
@@ -121,13 +129,13 @@ const Indicator = GObject.registerClass(
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
-                    style_class: 'panel-calc-rpn-displayLabel'
+                    style_class: 'panel-calc-rpn-stackValueLabel'
                 }));
                 zStackBox.add_actor(new St.Label({
                     text: ":Z",
                     x_align: Clutter.ActorAlign.END,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayNameLabel'
+                    style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
                 yStackBox.add_actor(new St.Label({
@@ -135,38 +143,41 @@ const Indicator = GObject.registerClass(
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
-                    style_class: 'panel-calc-rpn-displayLabel'
+                    style_class: 'panel-calc-rpn-stackValueLabel'
                 }));
                 yStackBox.add_actor(new St.Label({
                     text: ":Y",
                     x_align: Clutter.ActorAlign.END,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayNameLabel'
+                    style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
-                stackBox.add_actor(x1StackBox);
-                stackBox.add_actor(tStackBox);
-                stackBox.add_actor(zStackBox);
-                stackBox.add_actor(yStackBox);
+                indicator1Box.add_actor(x1StackBox);
 
-                stackArea.menu.box.add(stackBox);
+                indicator2Box.add_actor(tStackBox);
+                indicator2Box.add_actor(zStackBox);
+                indicator2Box.add_actor(yStackBox);
+
+                indicatorSArea.menu.box.add(indicator1Box);
+                indicatorSArea.menu.box.add(new PopupMenu.PopupSeparatorMenuItem());
+                indicatorSArea.menu.box.add(indicator2Box);
             }
 
-            //-- Init register display
-            let registerArea = new PopupMenu.PopupBaseMenuItem({
+            //-- Init Indicator0
+            let indicator0Area = new PopupMenu.PopupBaseMenuItem({
                 reactive: false,
                 style_class: 'panel-calc-rpn-PopupBaseMenuItem'
             });
-            registerArea.setOrnament(PopupMenu.Ornament.HIDDEN);
+            indicator0Area.setOrnament(PopupMenu.Ornament.HIDDEN);
 
-            //-- Insert register display controls
+            //-- Insert Indicator0 controls
             {
-                let registerBox = new St.BoxLayout({
+                let indicator0Box = new St.BoxLayout({
                     vertical: true,
                     x_expand: true,
                     y_expand: true,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayBoxLayout'
+                    style_class: 'panel-calc-rpn-indicator0BoxLayout'
                 });
 
                 let xStackBox = new St.BoxLayout({
@@ -182,31 +193,31 @@ const Indicator = GObject.registerClass(
                     x_expand: true,
                     x_align: Clutter.ActorAlign.FILL,
                     y_align: Clutter.ActorAlign.FILL,
-                    style_class: 'panel-calc-rpn-displayLabel'
+                    style_class: 'panel-calc-rpn-stackValueLabel'
                 });
-                this._register.get_clutter_text().set_justify(true); 
-                this._register.get_clutter_text().set_line_alignment(Pango.Alignment.RIGHT);
+//                this._register.get_clutter_text().set_justify(true);
+//                this._register.get_clutter_text().set_line_alignment(Pango.Alignment.RIGHT);
 
                 xStackBox.add_actor(this._register);
                 xStackBox.add_actor(new St.Label({
                     text: ":X",
                     x_align: Clutter.ActorAlign.END,
                     y_align: Clutter.ActorAlign.CENTER,
-                    style_class: 'panel-calc-rpn-displayNameLabel'
+                    style_class: 'panel-calc-rpn-stackNameLabel'
                 }));
 
-                registerBox.add_actor(xStackBox);
-                registerArea.actor.add_child(registerBox);
+                indicator0Box.add_actor(xStackBox);
+                indicator0Area.actor.add_child(indicator0Box);
             }
 
-            //-- Init keyboard
+            //-- Init Keyboard
             let keyboardArea = new PopupMenu.PopupBaseMenuItem({
                 reactive: false,
                 style_class: 'panel-calc-rpn-PopupBaseMenuItem'
             });
             keyboardArea.setOrnament(PopupMenu.Ornament.HIDDEN);
 
-            //-- Insert keyboard controls
+            //-- Insert Keyboard controls
             {
                 let keyboardBox = new St.BoxLayout({
                     vertical: true,
@@ -395,8 +406,8 @@ const Indicator = GObject.registerClass(
             }
 
             //-- Init Popup
-            this.menu.addMenuItem(stackArea);
-            this.menu.addMenuItem(registerArea);
+            this.menu.addMenuItem(indicatorSArea);
+            this.menu.addMenuItem(indicator0Area);
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(keyboardArea);
 
@@ -412,7 +423,15 @@ class Extension {
 
     enable() {
         this._indicator = new Indicator();
-        Main.panel.addToStatusArea(this._uuid, this._indicator);
+        /* 
+         * In here we are adding the button in the status area
+         * - `PopupMenuExample` is tha role, must be unique. You can access it from the Looking Glass  in 'Main.panel.statusArea.PopupMenuExample`
+         * - button is and instance of panelMenu.Button
+         * - 0 is the position
+         * - `right` is the box where we want our button to be displayed (left/center/right)
+         */
+        // Main.panel.addToStatusArea(this._uuid, this._indicator);
+        Main.panel.addToStatusArea(this._uuid, this._indicator, 0, 'center');
     }
 
     disable() {

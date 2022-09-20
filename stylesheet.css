@@ -9,18 +9,22 @@
     margin: 0em;
 }
 
-.panel-calc-rpn-displayBoxLayout {
+.panel-calc-rpn-indicator0BoxLayout {
+    padding-top: 0.5em;
+}
+
+.panel-calc-rpn-indicatorBoxLayout {
     padding-bottom: 0.5em;
 }
 
 .panel-calc-rpn-stackBoxLayout {
-    padding-top: 0.5em;
-    padding-bottom: 0em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
     padding-left: 0.5em;
     padding-right: 0.5em;
 }
 
-.panel-calc-rpn-displayNameLabel {
+.panel-calc-rpn-stackNameLabel {
     font-family: monospace;
     font-weight: bold;
     color: white;
@@ -29,7 +33,7 @@
     padding-right: 0em;
 }
 
-.panel-calc-rpn-displayLabel {
+.panel-calc-rpn-stackValueLabel {
     border-radius: 0.333em;
     border-width: 0.083em;
     border-color: gainsboro;
