@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-/* exported init */
+'use strict';
 
 const { GObject, St, Clutter, Pango } = imports.gi;
 const Gettext = imports.gettext;
@@ -76,106 +76,6 @@ const Indicator = GObject.registerClass(
             this.menu.addMenuItem(keyboardArea);
 
             this._refreshIndicators();
-        }
-
-        _refreshIndicators() {
-            this._xIndicator.set_text(this._processor.x);
-            this._yIndicator.set_text(this._processor.y);
-            this._zIndicator.set_text(this._processor.z);
-            this._tIndicator.set_text(this._processor.t);
-            this._x1Indicator.set_text(this._processor.x1);
-        }
-
-        _onKeyboardDispatcher(button) {
-            //Main.notify(button.get_label(), String(clicked_button));
-
-            switch (button.get_label()) {
-                case this._processor.Glyph.ZERO:
-                    this._processor.setDigit(0);
-                    break;
-
-                case this._processor.Glyph.ONE:
-                    this._processor.setDigit(1);
-                    break;
-
-                case this._processor.Glyph.TWO:
-                    this._processor.setDigit(2);
-                    break;
-
-                case this._processor.Glyph.THREE:
-                    this._processor.setDigit(3);
-                    break;
-
-                case this._processor.Glyph.FOUR:
-                    this._processor.setDigit(4);
-                    break;
-
-                case this._processor.Glyph.FIVE:
-                    this._processor.setDigit(5);
-                    break;
-
-                case this._processor.Glyph.SIX:
-                    this._processor.setDigit(6);
-                    break;
-
-                case this._processor.Glyph.SEVEN:
-                    this._processor.setDigit(7);
-                    break;
-
-                case this._processor.Glyph.EIGHT:
-                    this._processor.setDigit(8);
-                    break;
-
-                case this._processor.Glyph.NINE:
-                    this._processor.setDigit(9);
-                    break;
-
-                case this._processor.Glyph.PERIOD:
-                    this._processor.point();
-                    break;
-
-                case this._processor.Glyph.PLUS:
-
-                    break;
-
-                case this._processor.Glyph.MINUS:
-
-                    break;
-
-                case this._processor.Glyph.MULTIPLY:
-
-                    break;
-
-                case this._processor.Glyph.DIVIDE:
-
-                    break;
-
-                case this._processor.Glyph.SIGN:
-                    this._processor.negate();
-                    break;
-
-                case this._processor.Glyph.UP:
-                    this._processor.push();
-                    break;
-
-                case this._processor.Glyph.SWAP:
-                    this._processor.swap();
-                    break;
-
-                case this._processor.Glyph.BACK_X:
-                    this._processor.popX();
-                    break;
-
-                case this._processor.Glyph.CLEAR_X:
-                    this._processor.clearX();
-                    break;
-
-                default:
-                    return;
-            }
-
-            this._refreshIndicators();
-            return;
         }
 
         _initIndicator(indicatorBox, name) {
@@ -315,6 +215,107 @@ const Indicator = GObject.registerClass(
             })
 
             keyboardArea.actor.add_child(keyboardBox);
+        }
+        
+        _refreshIndicators() {
+            this._xIndicator.set_text(this._processor.x);
+            this._yIndicator.set_text(this._processor.y);
+            this._zIndicator.set_text(this._processor.z);
+            this._tIndicator.set_text(this._processor.t);
+            this._x1Indicator.set_text(this._processor.x1);
+        }
+
+        _onKeyboardDispatcher(button) {
+            switch (button.get_label()) {
+                case this._processor.Glyph.ZERO:
+                    this._processor.digit = 0;
+                    break;
+
+                case this._processor.Glyph.ONE:
+                    this._processor.digit = 1;
+                    break;
+
+                case this._processor.Glyph.TWO:
+                    this._processor.digit = 2;
+                    break;
+
+                case this._processor.Glyph.THREE:
+                    this._processor.digit = 3;
+                    break;
+
+                case this._processor.Glyph.FOUR:
+                    this._processor.digit = 4;
+                    break;
+
+                case this._processor.Glyph.FIVE:
+                    this._processor.digit = 5;
+                    break;
+
+                case this._processor.Glyph.SIX:
+                    this._processor.digit = 6;
+                    break;
+
+                case this._processor.Glyph.SEVEN:
+                    this._processor.digit = 7;
+                    break;
+
+                case this._processor.Glyph.EIGHT:
+                    this._processor.digit = 8;
+                    break;
+
+                case this._processor.Glyph.NINE:
+                    this._processor.digit = 9;
+                    break;
+
+                case this._processor.Glyph.PERIOD:
+                    this._processor.period();
+                    break;
+
+                case this._processor.Glyph.PLUS:
+
+                    break;
+
+
+                case this._processor.Glyph.MINUS:
+
+                    break;
+
+                case this._processor.Glyph.MULTIPLY:
+
+                    break;
+
+                case this._processor.Glyph.DIVIDE:
+
+
+                    break;
+
+                case this._processor.Glyph.SIGN:
+                    this._processor.negate();
+                    break;
+
+
+                case this._processor.Glyph.UP:
+                    this._processor.push();
+                    break;
+
+
+                case this._processor.Glyph.SWAP:
+                    this._processor.swap();
+                    break;
+
+                case this._processor.Glyph.BACK_X:
+                    this._processor.popX();
+                    break;
+
+                case this._processor.Glyph.CLEAR_X:
+                    this._processor.clearX();
+                    break;
+
+                default:
+                    return;
+            }
+
+            this._refreshIndicators();
         }
     }
 );

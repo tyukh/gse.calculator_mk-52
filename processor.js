@@ -22,6 +22,112 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Decimal = Me.imports.decimal.decimal;
 
+const Main = imports.ui.main;
+
+class _Editor {
+    constructor() {
+        this.clear();
+    }
+
+    Precision = {
+        MAX: 8,
+        MAX_E: 2
+    }
+
+    clear() {
+        this._sign = false;
+        this._digits = this.Precision.MAX;
+        this._period = false;
+        this._integer = "0";
+        this._rational = "";
+        this._signE = false;
+        this._integerE = "0";
+        this._digitsE = this.Precision.MAX_E;
+        this._e = false;
+    }
+
+// Main.notify(String(this._digits), String(value));
+
+    digit(value) {
+        if(this._e == false) {
+            if(this._digits > 0) {
+                if(this._period == false) {
+                    if(this._digits == this.Precision.MAX) {
+                        if(value > 0) {
+                            this._integer = value.toString();
+                            this._digits--;
+                        }
+                    } else {
+                        this._integer = this._integer + value.toString();
+                        this._digits--;
+                    }
+                } else {
+                    this._rational = this._rational + value.toString();
+                    this._digits--;
+                }
+            }
+        }
+    }
+
+    period() {
+        if(this._e == false) {
+            this._period = true;
+            if(this._digits == this.Precision.MAX)
+                this._digits--;
+        }
+    }
+
+    negate() {
+        if(this._e == false) {
+            this._sign = !this._sign;
+        }
+    }
+
+    exponent() {
+        this._e = true;
+    }
+
+    get string() {
+        let value = "";
+        if(this._sign == true)
+            value = "-" + value;
+        value = value + this._integer;
+        if(this._period == true) {
+            value = value + "." + this._rational;
+        }
+        return value;
+    }
+}
+
+/*
+let _format = function (register) {
+    let string = "-1.2345678-99";
+    const digits = [
+        '\u{1F100}', '\u{2488}', '\u{2489}', '\u{248A}', '\u{248B}', '\u{248C}', '\u{248D}', '\u{248E}', '\u{248F}', '\u{2490}'
+    ];
+
+    switch (register) {
+        case this.Register.X:
+            string = this._x.valueOf();
+            break;
+        case this.Register.Y:
+            string = this._y.valueOf();
+            break;
+        case this.Register.Z:
+            string = this._z.valueOf();
+            break;
+        case this.Register.T:
+            string = this._t.valueOf();
+            break;
+        case this.Register.X1:
+            string = this._x1.valueOf();
+            break;
+    }
+
+    return string;
+}
+*/
+
 var Processor = class Processor {
     constructor() {
 
@@ -30,9 +136,7 @@ var Processor = class Processor {
             rounding: Decimal.Decimal.ROUND_HALF_UP
         });
 
-        this._xSign = new Decimal.Decimal(1);
-        this._xDigits = 8;
-        this._xPeriod = false;
+        this._editor = new _Editor();  
 
         this._x = new Decimal.Decimal(0);
         this._y = new Decimal.Decimal(0);
@@ -72,73 +176,35 @@ var Processor = class Processor {
         BACK_X: "BX",
         CLEAR_X: "CX"
     };
-
-    _format(register) {
-        let string = "-1.2345678-99";
-        const digits = [
-            '\u{1F100}', '\u{2488}', '\u{2489}', '\u{248A}', '\u{248B}', '\u{248C}', '\u{248D}', '\u{248E}', '\u{248F}', '\u{2490}'
-        ];
-
-        switch (register) {
-            case this.Register.X:
-                string = this._x.valueOf();
-                break;
-            case this.Register.Y:
-                string = this._y.valueOf();
-                break;
-            case this.Register.Z:
-                string = this._z.valueOf();
-                break;
-            case this.Register.T:
-                string = this._t.valueOf();
-                break;
-            case this.Register.X1:
-                string = this._x1.valueOf();
-                break;
-        }
-
-        return string;
-    }
-
+ 
     get x() {
-        return this._format(this.Register.X);
+//        return this._format(this.Register.X);
+        return this._editor.string;
     }
 
     get y() {
-        return this._format(this.Register.Y);
+        return this._y.valueOf();
     }
 
     get z() {
-        return this._format(this.Register.Z);
+        return this._z.valueOf();
     }
 
     get t() {
-        return this._format(this.Register.T);
+        return this._t.valueOf();
     }
 
     get x1() {
-        return this._format(this.Register.X1);
-    }
-
-    _defaultXParameters() {
-        this._xSign = Decimal.Decimal(1);
-        this._xDigits = 8;
-        this._xPeriod = false;
-        return Decimal.Decimal(0);
+        return this._x1.valueOf();
     }
 
     clearX() {
-        this._x = this._clearXParameters();
-    }
-
-    _unsignZeroX() {
-        if (this._x.isZero() && this._x.isNegative())
-            this.negate();
-        return this._x;
+        this._x = 0;
+        this._editor.clear();
     }
 
     pushX() {
-        this._x1 = this._unsignZeroX();
+        this._x1 = this._x;
     }
 
     popX() {
@@ -149,7 +215,7 @@ var Processor = class Processor {
     push() {
         this._t = this._z;
         this._z = this._y;
-        this._y = this._unsignZeroX();
+        this._y = this._x;
     }
 
     pop() {
@@ -161,21 +227,21 @@ var Processor = class Processor {
 
     swap() {
         let s = this._y;
-        this._y = this._unsignZeroX();
+        this._y = this._x;
         this._x = s;
     }
 
     negate() {
-        this._xSign = this._xSign.negated();
-        this._x = this._x.negated();
+//        this._x = this._x.negated();
+        this._editor.negate();
     }
 
-    point() {
-        this._xPeriod = true;
+    period() {
+        this._editor.period();
     }
 
-    setDigit(digit) {
-        return;
+    set digit(value) {
+        this._editor.digit(value);
     }
 
 };
