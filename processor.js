@@ -18,143 +18,51 @@
 
 'use strict';
 
+//const Main = imports.ui.main;
+//Main.notify('Message Title', 'Message Body');
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Decimal = Me.imports.decimal.decimal;
 
-const Main = imports.ui.main;
-
-class _Editor {
-    constructor() {
-        this.clear();
-    }
-
-    Precision = {
-        MAX: 8,
-        MAX_E: 2
-    }
-
-    clear() {
-        this._sign = false;
-        this._digits = this.Precision.MAX;
-        this._period = false;
-        this._integer = "0";
-        this._rational = "";
-        this._signE = false;
-        this._integerE = "0";
-        this._digitsE = this.Precision.MAX_E;
-        this._e = false;
-    }
-
-// Main.notify(String(this._digits), String(value));
-
-    digit(value) {
-        if(this._e == false) {
-            if(this._digits > 0) {
-                if(this._period == false) {
-                    if(this._digits == this.Precision.MAX) {
-                        if(value > 0) {
-                            this._integer = value.toString();
-                            this._digits--;
-                        }
-                    } else {
-                        this._integer = this._integer + value.toString();
-                        this._digits--;
-                    }
-                } else {
-                    this._rational = this._rational + value.toString();
-                    this._digits--;
-                }
-            }
-        }
-    }
-
-    period() {
-        if(this._e == false) {
-            this._period = true;
-            if(this._digits == this.Precision.MAX)
-                this._digits--;
-        }
-    }
-
-    negate() {
-        if(this._e == false) {
-            this._sign = !this._sign;
-        }
-    }
-
-    exponent() {
-        this._e = true;
-    }
-
-    get string() {
-        let value = "";
-        if(this._sign == true)
-            value = "-" + value;
-        value = value + this._integer;
-        if(this._period == true) {
-            value = value + "." + this._rational;
-        }
-        return value;
-    }
-}
-
-/*
-let _format = function (register) {
-    let string = "-1.2345678-99";
-    const digits = [
-        '\u{1F100}', '\u{2488}', '\u{2489}', '\u{248A}', '\u{248B}', '\u{248C}', '\u{248D}', '\u{248E}', '\u{248F}', '\u{2490}'
-    ];
-
-    switch (register) {
-        case this.Register.X:
-            string = this._x.valueOf();
-            break;
-        case this.Register.Y:
-            string = this._y.valueOf();
-            break;
-        case this.Register.Z:
-            string = this._z.valueOf();
-            break;
-        case this.Register.T:
-            string = this._t.valueOf();
-            break;
-        case this.Register.X1:
-            string = this._x1.valueOf();
-            break;
-    }
-
-    return string;
-}
-*/
-
 var Processor = class Processor {
+    
     constructor() {
-
         Decimal.Decimal.set({
-            precision: 8,
-            rounding: Decimal.Decimal.ROUND_HALF_UP
+            precision: Processor.Precision.MAX,
+            rounding: Decimal.Decimal.ROUND_HALF_UP,
+            minE: Processor.Precision.MIN_E_VALUE, 
+            maxE: Processor.Precision.MAX_E_VALUE
         });
-
-        this._editor = new _Editor();  
 
         this._x = new Decimal.Decimal(0);
         this._y = new Decimal.Decimal(0);
         this._z = new Decimal.Decimal(0);
         this._t = new Decimal.Decimal(0);
         this._x1 = new Decimal.Decimal(0);
-
+        this._r = new Decimal.Decimal(0);
+        
+        this._clear();
     }
 
-    Register = {
-        X: 0,
-        Y: 1,
-        Z: 2,
-        T: 3,
-        X1: 4
-    };
+    static Precision = {
+        MAX: 8,
+        MAX_E: 2,
+        MIN_E_VALUE: -99, 
+        MAX_E_VALUE: 99
+    }
 
-    Glyph = {
+    static Indicator = {
+        INDICATOR: 0,
+        INDICATOR_E: 1,
+        REGISTER_X: 2,
+        REGISTER_Y: 3,
+        REGISTER_Z: 4,
+        REGISTER_T: 5,
+        REGISTER_X1: 6
+    }
+
+    static Glyph = {
         ZERO: "0",
         ONE: "1",
         TWO: "2",
@@ -176,31 +84,113 @@ var Processor = class Processor {
         BACK_X: "BX",
         CLEAR_X: "CX"
     };
- 
-    get x() {
-//        return this._format(this.Register.X);
-        return this._editor.string;
+
+    _clear() {
+        this._sign = false;
+        this._number = [];
+        this._point = 0;
+        this._real = false;
+
+        this._e = false;
+        this._signE = false;
+        this._numberE = [0, 0];        
+
+        this._error = false;
     }
 
-    get y() {
-        return this._y.valueOf();
+    _isReal() {
+        return (this._real == true);
     }
 
-    get z() {
-        return this._z.valueOf();
+    _isE() {
+        return (this._e == true);
     }
 
-    get t() {
-        return this._t.valueOf();
+    _isError() {
+        return (this._error == true);
     }
 
-    get x1() {
-        return this._x1.valueOf();
+    _toDecimal() {
+        let value = Decimal.Decimal(0);
+        
+        if(this._number.length == 0)
+            return value;
+
+        for(let index = 0; index < this._number.length; index++) {
+            if(index < this._point) {
+                value = value.times(Decimal.Decimal(10));
+                value = value.plus(Decimal.Decimal(this._number[index]));
+            } else {
+                value = value.plus(Decimal.Decimal.div(this._number[index], Decimal.Decimal.pow(10, value.decimalPlaces() + 1)));
+            }
+        }
+
+/*        let power = this._numberE[0] * 10 + this._numberE[1];
+        if(this._signE == true)
+            power = -power;
+        value = value.times(Decimal.Decimal.pow(10, power));
+*/
+        if(this._sign == true)
+            value = value.negate();
+
+        return value;
+    }
+
+    _toIndicator() {
+        let number = Array(" ", " ", " ", " ", " ", " ", " ", " ");
+        let string = "";
+        
+        if(this._sign == true) {
+            string = "-" + string;
+        }
+
+        let index = 0;
+        if(this._number.length > 0) {
+            this._number.forEach(digit => {
+                number[index] = digit.toString();
+                index ++;
+            });
+            number.splice(this._point, 0, ".");
+        } else {
+            number[0] = "0";
+            number[1] = ".";
+        }
+
+        return string + number.join("");
+    }
+
+    _setIndicator(indicator, value) {
+        this._indicatorsCallback(indicator, value);
+    }
+
+    connectIndicators(callback) {
+        this._indicatorsCallback = callback; 
+    }
+
+    _updateIndicators() {
+        this._setIndicator(Processor.Indicator.REGISTER_X, this._x.toString());
+        this._setIndicator(Processor.Indicator.REGISTER_Y, this._y.toString());
+        this._setIndicator(Processor.Indicator.REGISTER_Z, this._z.toString());
+        this._setIndicator(Processor.Indicator.REGISTER_T, this._t.toString());
+        this._setIndicator(Processor.Indicator.REGISTER_X1, this._x1.toString());
+
+        this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
+        this._setIndicator(Processor.Indicator.INDICATOR_E, "");
+    }
+
+    _updateX() {
+        this._setIndicator(Processor.Indicator.REGISTER_X, this._x.toString());
+        this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
+    }
+    
+    init() {
+        this._updateIndicators();
     }
 
     clearX() {
-        this._x = 0;
-        this._editor.clear();
+        this._x = Decimal.Decimal(0);
+        this._clear();
+        this._updateIndicators();
     }
 
     pushX() {
@@ -226,22 +216,46 @@ var Processor = class Processor {
     }
 
     swap() {
-        let s = this._y;
+        let temporal = this._y;
         this._y = this._x;
-        this._x = s;
+        this._x = temporal;
     }
 
     negate() {
-//        this._x = this._x.negated();
-        this._editor.negate();
+        // this._x.negate();
     }
 
-    period() {
-        this._editor.period();
+    point() {
+        if (this._isE()) {
+            this._error = true;
+        } else {
+            this._real = true;
+        }
     }
 
-    set digit(value) {
-        this._editor.digit(value);
+/*    setE() {
+        if(this._number.length == 0) {
+            this._number.push(1);
+            this._number._point = 1;
+        }
+        this._e = true;
+    }
+*/
+
+    digit(value) {
+        if (!this._isE()) {
+            if(this._number.length < Processor.Precision.MAX) {
+                this._number.push(value);
+                if(!this._isReal()) {
+                    this._point = this._number.length;
+                }
+            }
+        } else {
+            this._numberE[0] = this._numberE[1];
+            this._numberE[1] = value;
+        }
+        this._x = this._toDecimal();
+        this._updateX();
     }
 
 };

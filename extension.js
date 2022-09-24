@@ -48,18 +48,20 @@ const Indicator = GObject.registerClass(
 
             //-- Init controls
 
-            //-- Init Indicator
-            let indicatorSArea = new PopupMenu.PopupSubMenuMenuItem(_("Stack"), false);
-            indicatorSArea.setOrnament(PopupMenu.Ornament.HIDDEN);
-            this._initIndicatorS(indicatorSArea);
+            //-- Init Stack
+            let stackArea = new PopupMenu.PopupSubMenuMenuItem(_("Stack registers"), false);
+            stackArea.setOrnament(PopupMenu.Ornament.HIDDEN);
+            this._initStack(stackArea);
 
-            //-- Init Indicator0
-            let indicator0Area = new PopupMenu.PopupBaseMenuItem({
+            //-- Init Indicator
+            let indicatorArea = new PopupMenu.PopupBaseMenuItem({
                 reactive: false,
                 style_class: 'panel-calc-rpn-PopupBaseMenuItem'
             });
-            indicator0Area.setOrnament(PopupMenu.Ornament.HIDDEN);
-            this._initIndicator0(indicator0Area);
+            indicatorArea.setOrnament(PopupMenu.Ornament.HIDDEN);
+            this._initIndicator(indicatorArea);
+
+            this._processor.connectIndicators(this._onIndicatorSet.bind(this));
 
             //-- Init Keyboard
             let keyboardArea = new PopupMenu.PopupBaseMenuItem({
@@ -70,87 +72,106 @@ const Indicator = GObject.registerClass(
             this._initKeyboard(keyboardArea);
 
             //-- Init Popup
-            this.menu.addMenuItem(indicatorSArea);
-            this.menu.addMenuItem(indicator0Area);
+            this.menu.addMenuItem(stackArea);
+            this.menu.addMenuItem(indicatorArea);
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(keyboardArea);
 
-            this._refreshIndicators();
+            this._processor.init();
         }
 
-        _initIndicator(indicatorBox, name) {
+        _initRegister(stackBox, name) {
             let box = new St.BoxLayout({
                 vertical: false,
                 x_expand: true,
                 y_expand: true,
                 y_align: Clutter.ActorAlign.CENTER,
-                style_class: 'panel-calc-rpn-stackBoxLayout'
+                style_class: 'panel-calc-rpn-registerBoxLayout'
             });
 
-            let indicator = new St.Label({
+            let register = new St.Label({
                 text: "",
                 x_expand: true,
                 x_align: Clutter.ActorAlign.FILL,
                 y_align: Clutter.ActorAlign.FILL,
-                style_class: 'panel-calc-rpn-stackValueLabel'
+                style_class: 'panel-calc-rpn-registerValueLabel'
             });
-            indicator.set_style(`font-family: ${this._fontFamily}`);
+            register.set_style(`font-family: ${this._fontFamily}`);
 
             let label = new St.Label({
                 text: name,
                 x_align: Clutter.ActorAlign.END,
                 y_align: Clutter.ActorAlign.CENTER,
-                style_class: 'panel-calc-rpn-stackNameLabel'
+                style_class: 'panel-calc-rpn-registerNameLabel'
             });
             label.set_style(`font-family: ${this._fontFamily}`);
 
-            box.add_actor(indicator);
+            box.add_actor(register);
             box.add_actor(label);
 
-            indicatorBox.add_actor(box);
+            stackBox.add_actor(box);
 
-            return indicator;
+            return register;
         }
 
-        _initIndicatorS(indicatorSArea) {
-            let indicator1Box = new St.BoxLayout({
+        _initStack(stackArea) {
+            let stack1Box = new St.BoxLayout({
                 vertical: true,
                 x_expand: true,
                 y_expand: true,
                 y_align: Clutter.ActorAlign.CENTER,
                 opacity: 150,
-                style_class: 'panel-calc-rpn-indicator0BoxLayout'
+                style_class: 'panel-calc-rpn-stack1BoxLayout'
             });
-            let indicator2Box = new St.BoxLayout({
+            let stack2Box = new St.BoxLayout({
                 vertical: true,
                 x_expand: true,
                 y_expand: true,
                 y_align: Clutter.ActorAlign.CENTER,
                 opacity: 150,
+                style_class: 'panel-calc-rpn-stack2BoxLayout'
+            });
+
+            this._x1Register = this._initRegister(stack1Box, "X\u{2081}");
+            this._tRegister = this._initRegister(stack2Box, "T");
+            this._zRegister = this._initRegister(stack2Box, "Z");
+            this._yRegister = this._initRegister(stack2Box, "Y");
+            this._xRegister = this._initRegister(stack2Box, "X");
+
+            stackArea.menu.box.add(stack1Box);
+            stackArea.menu.box.add(new PopupMenu.PopupSeparatorMenuItem());
+            stackArea.menu.box.add(stack2Box);
+        }
+
+        _initIndicator(indicatorArea) {
+            let indicatorBox = new St.BoxLayout({
+                vertical: false,
+                x_expand: true,
+                y_expand: true,
+                y_align: Clutter.ActorAlign.CENTER,
                 style_class: 'panel-calc-rpn-indicatorBoxLayout'
             });
 
-            this._x1Indicator = this._initIndicator(indicator1Box, "X\u{2081}");
-            this._tIndicator = this._initIndicator(indicator2Box, "T");
-            this._zIndicator = this._initIndicator(indicator2Box, "Z");
-            this._yIndicator = this._initIndicator(indicator2Box, "Y");
-
-            indicatorSArea.menu.box.add(indicator1Box);
-            indicatorSArea.menu.box.add(new PopupMenu.PopupSeparatorMenuItem());
-            indicatorSArea.menu.box.add(indicator2Box);
-        }
-
-        _initIndicator0(indicator0Area) {
-            let indicator0Box = new St.BoxLayout({
-                vertical: true,
+            this._indicator = new St.Label({
+                text: "",
                 x_expand: true,
-                y_expand: true,
-                y_align: Clutter.ActorAlign.CENTER,
-                style_class: 'panel-calc-rpn-indicator0BoxLayout'
+                x_align: Clutter.ActorAlign.FILL,
+                y_align: Clutter.ActorAlign.FILL,
+                style_class: 'panel-calc-rpn-indicatorLabel'
             });
+            this._indicator.set_style(`font-family: ${this._fontFamily}`);
+            this._indicatorE = new St.Label({
+                text: "",
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.FILL,
+                style_class: 'panel-calc-rpn-indicatorELabel'
+            });
+            this._indicatorE.set_style(`font-family: ${this._fontFamily}`);
 
-            this._xIndicator = this._initIndicator(indicator0Box, "X", 'panel-calc-rpn-stackBoxLayout');
-            indicator0Area.actor.add_child(indicator0Box);
+            indicatorBox.add_actor(this._indicator);
+            indicatorBox.add_actor(this._indicatorE);
+
+            indicatorArea.actor.add_child(indicatorBox);
         }
 
         _initKeyboard(keyboardArea) {
@@ -164,32 +185,32 @@ const Indicator = GObject.registerClass(
 
             let keyMatrix = [
                 [
-                    { label: this._processor.Glyph.SEVEN, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.EIGHT, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.NINE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.MINUS, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.DIVIDE, style_class: 'panel-calc-rpn-grayButton' }
+                    { label: Processor.Processor.Glyph.SEVEN, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.EIGHT, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.NINE, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.MINUS, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.DIVIDE, style_class: 'panel-calc-rpn-grayButton' }
                 ],
                 [
-                    { label: this._processor.Glyph.FOUR, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.FIVE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.SIX, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.PLUS, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.MULTIPLY, style_class: 'panel-calc-rpn-grayButton' }
+                    { label: Processor.Processor.Glyph.FOUR, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.FIVE, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.SIX, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.PLUS, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.MULTIPLY, style_class: 'panel-calc-rpn-grayButton' }
                 ],
                 [
-                    { label: this._processor.Glyph.ONE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.TWO, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.THREE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.SWAP, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.UP, style_class: 'panel-calc-rpn-grayButton' }
+                    { label: Processor.Processor.Glyph.ONE, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.TWO, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.THREE, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.SWAP, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.UP, style_class: 'panel-calc-rpn-grayButton' }
                 ],
                 [
-                    { label: this._processor.Glyph.ZERO, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.PERIOD, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.SIGN, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.BACK_X, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: this._processor.Glyph.CLEAR_X, style_class: 'panel-calc-rpn-redButton' }
+                    { label: Processor.Processor.Glyph.ZERO, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.PERIOD, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.SIGN, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.BACK_X, style_class: 'panel-calc-rpn-grayButton' },
+                    { label: Processor.Processor.Glyph.CLEAR_X, style_class: 'panel-calc-rpn-redButton' }
                 ]
             ];
 
@@ -216,98 +237,125 @@ const Indicator = GObject.registerClass(
 
             keyboardArea.actor.add_child(keyboardBox);
         }
-        
-        _refreshIndicators() {
-            this._xIndicator.set_text(this._processor.x);
-            this._yIndicator.set_text(this._processor.y);
-            this._zIndicator.set_text(this._processor.z);
-            this._tIndicator.set_text(this._processor.t);
-            this._x1Indicator.set_text(this._processor.x1);
+
+        _onIndicatorSet(indicator, value) {
+            switch (indicator) {
+                case Processor.Processor.Indicator.INDICATOR:
+                    this._indicator.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.INDICATOR_E:
+                    this._indicator.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_X:
+                    this._xRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_Y:
+                    this._yRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_Z:
+                    this._zRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_T:
+                    this._tRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_X1:
+                    this._x1Register.set_text(value);
+                    break;
+
+                default:
+                    return;
+            }
         }
 
         _onKeyboardDispatcher(button) {
             switch (button.get_label()) {
-                case this._processor.Glyph.ZERO:
-                    this._processor.digit = 0;
+                case Processor.Processor.Glyph.ZERO:
+                    this._processor.digit(0);
                     break;
 
-                case this._processor.Glyph.ONE:
-                    this._processor.digit = 1;
+                case Processor.Processor.Glyph.ONE:
+                    this._processor.digit(1);
                     break;
 
-                case this._processor.Glyph.TWO:
-                    this._processor.digit = 2;
+                case Processor.Processor.Glyph.TWO:
+                    this._processor.digit(2);
                     break;
 
-                case this._processor.Glyph.THREE:
-                    this._processor.digit = 3;
+                case Processor.Processor.Glyph.THREE:
+                    this._processor.digit(3);
                     break;
 
-                case this._processor.Glyph.FOUR:
-                    this._processor.digit = 4;
+                case Processor.Processor.Glyph.FOUR:
+                    this._processor.digit(4);
                     break;
 
-                case this._processor.Glyph.FIVE:
-                    this._processor.digit = 5;
+                case Processor.Processor.Glyph.FIVE:
+                    this._processor.digit(5);
                     break;
 
-                case this._processor.Glyph.SIX:
-                    this._processor.digit = 6;
+                case Processor.Processor.Glyph.SIX:
+                    this._processor.digit(6);
                     break;
 
-                case this._processor.Glyph.SEVEN:
-                    this._processor.digit = 7;
+                case Processor.Processor.Glyph.SEVEN:
+                    this._processor.digit(7);
                     break;
 
-                case this._processor.Glyph.EIGHT:
-                    this._processor.digit = 8;
+                case Processor.Processor.Glyph.EIGHT:
+                    this._processor.digit(8);
                     break;
 
-                case this._processor.Glyph.NINE:
-                    this._processor.digit = 9;
+                case Processor.Processor.Glyph.NINE:
+                    this._processor.digit(9);
                     break;
 
-                case this._processor.Glyph.PERIOD:
-                    this._processor.period();
+                case Processor.Processor.Glyph.PERIOD:
+                    this._processor.point();
                     break;
 
-                case this._processor.Glyph.PLUS:
-
-                    break;
-
-
-                case this._processor.Glyph.MINUS:
+                case Processor.Processor.Glyph.PLUS:
 
                     break;
 
-                case this._processor.Glyph.MULTIPLY:
+
+                case Processor.Processor.Glyph.MINUS:
 
                     break;
 
-                case this._processor.Glyph.DIVIDE:
+                case Processor.Processor.Glyph.MULTIPLY:
+
+                    break;
+
+                case Processor.Processor.Glyph.DIVIDE:
 
 
                     break;
 
-                case this._processor.Glyph.SIGN:
+                case Processor.Processor.Glyph.SIGN:
                     this._processor.negate();
                     break;
 
 
-                case this._processor.Glyph.UP:
+                case Processor.Processor.Glyph.UP:
                     this._processor.push();
                     break;
 
 
-                case this._processor.Glyph.SWAP:
+                case Processor.Processor.Glyph.SWAP:
                     this._processor.swap();
                     break;
 
-                case this._processor.Glyph.BACK_X:
+                case Processor.Processor.Glyph.BACK_X:
                     this._processor.popX();
                     break;
 
-                case this._processor.Glyph.CLEAR_X:
+                case Processor.Processor.Glyph.CLEAR_X:
                     this._processor.clearX();
                     break;
 
@@ -315,7 +363,6 @@ const Indicator = GObject.registerClass(
                     return;
             }
 
-            this._refreshIndicators();
         }
     }
 );
