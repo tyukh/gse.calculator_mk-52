@@ -26,13 +26,15 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Decimal = Me.imports.decimal.decimal;
 
 var Processor = class Processor {
-    
+
     constructor() {
         Decimal.Decimal.set({
             precision: Processor.Precision.MAX,
             rounding: Decimal.Decimal.ROUND_HALF_UP,
-            minE: Processor.Precision.MIN_E_VALUE, 
-            maxE: Processor.Precision.MAX_E_VALUE
+            minE: Processor.Precision.MIN_E_VALUE,
+            maxE: Processor.Precision.MAX_E_VALUE,
+            toExpPos: Processor.Precision.MAX,
+            toExpNeg: -1
         });
 
         this._x = new Decimal.Decimal(0);
@@ -41,14 +43,22 @@ var Processor = class Processor {
         this._t = new Decimal.Decimal(0);
         this._x1 = new Decimal.Decimal(0);
         this._r = new Decimal.Decimal(0);
-        
+
         this._clear();
+    }
+
+    connectIndicators(callback) {
+        this._indicatorsCallback = callback;
+    }
+
+    init() {
+        this._updateIndicatorsAfterOp();
     }
 
     static Precision = {
         MAX: 8,
         MAX_E: 2,
-        MIN_E_VALUE: -99, 
+        MIN_E_VALUE: -99,
         MAX_E_VALUE: 99
     }
 
@@ -93,7 +103,7 @@ var Processor = class Processor {
 
         this._e = false;
         this._signE = false;
-        this._numberE = [0, 0];        
+        this._numberE = [0, 0];
 
         this._error = false;
     }
@@ -112,12 +122,12 @@ var Processor = class Processor {
 
     _toDecimal() {
         let value = Decimal.Decimal(0);
-        
-        if(this._number.length == 0)
+
+        if (this._number.length == 0)
             return value;
 
-        for(let index = 0; index < this._number.length; index++) {
-            if(index < this._point) {
+        for (let index = 0; index < this._number.length; index++) {
+            if (index < this._point) {
                 value = value.times(Decimal.Decimal(10));
                 value = value.plus(Decimal.Decimal(this._number[index]));
             } else {
@@ -125,105 +135,155 @@ var Processor = class Processor {
             }
         }
 
-/*        let power = this._numberE[0] * 10 + this._numberE[1];
-        if(this._signE == true)
+        let power = this._numberE[0] * 10 + this._numberE[1];
+        if (this._signE == true)
             power = -power;
         value = value.times(Decimal.Decimal.pow(10, power));
-*/
-        if(this._sign == true)
+
+        if (this._sign == true)
             value = value.negate();
 
         return value;
     }
 
     _toIndicator() {
-        let number = Array(" ", " ", " ", " ", " ", " ", " ", " ");
         let string = "";
-        
-        if(this._sign == true) {
+
+        if (this._number.length > 0) {
+            let index = 1;
+            this._number.forEach(digit => {
+                string = string + digit.toString();
+                if (index == this._point) {
+                    string = string + ".";
+                }
+                index++;
+            });
+        } else {
+            string = string + "0.";
+        }
+
+        if (this._sign == true) {
             string = "-" + string;
         }
 
-        let index = 0;
-        if(this._number.length > 0) {
-            this._number.forEach(digit => {
-                number[index] = digit.toString();
-                index ++;
-            });
-            number.splice(this._point, 0, ".");
-        } else {
-            number[0] = "0";
-            number[1] = ".";
+        return string;
+    }
+
+    _toIndicatorE() {
+        let string = "";
+
+        if ((this._numberE[0] != 0) && (this._numberE[1] != 0)) {
+            string = string + this._numberE[0].toString() + this._numberE[1].toString();
+
+            if (this._signE == true) {
+                string = "-" + string;
+            }
         }
 
-        return string + number.join("");
+        return string;
+    }
+
+    _formatDecimalMantissa(value) {
+        let string = value.valueOf().split("e");
+        if (string[0].indexOf(".") == -1)
+            string[0] = string[0].concat(".");
+        return string[0];
+    }
+
+    _formatDecimalExponent(value) {
+        let string = value.valueOf().split("e");
+        if (string.length > 1) {
+            let e = string[1].split("");
+            if (e[0] == "+")
+                e[0] = " ";
+            if (e.length == 2)
+                return e[0].concat("0", e[1]);
+            else
+                return e[0].concat(e[1], e[2]);
+        }
+        return "";
+    }
+
+    _formatDecimal(value) {
+        const digit = [
+            "\u{2070}", "\u{00b9}", "\u{00b2}", "\u{00b3}", "\u{2074}",
+            "\u{2075}", "\u{2076}", "\u{2077}", "\u{2078}", "\u{2079}"
+        ];
+        let string = value.toString().split("e");
+        if (string.length > 1) {
+            let exp = "\u{2219}10";
+            let e = string[1].split("");
+            e.forEach(symbol => {
+                switch (symbol) {
+                    case "-":
+                        exp = exp.concat("\u{207b}");
+                        break;
+                    case "+":
+                        break;
+                    default:
+                        exp = exp.concat(digit[symbol.charCodeAt(0) - "0".charCodeAt(0)]);
+                        break;
+                }
+            });
+            return string[0].concat(exp); 
+        }
+        return string[0];
     }
 
     _setIndicator(indicator, value) {
         this._indicatorsCallback(indicator, value);
     }
 
-    connectIndicators(callback) {
-        this._indicatorsCallback = callback; 
-    }
-
     _updateIndicators() {
-        this._setIndicator(Processor.Indicator.REGISTER_X, this._x.toString());
-        this._setIndicator(Processor.Indicator.REGISTER_Y, this._y.toString());
-        this._setIndicator(Processor.Indicator.REGISTER_Z, this._z.toString());
-        this._setIndicator(Processor.Indicator.REGISTER_T, this._t.toString());
-        this._setIndicator(Processor.Indicator.REGISTER_X1, this._x1.toString());
+        this._setIndicator(Processor.Indicator.REGISTER_X, this._formatDecimal(this._x));
+        this._setIndicator(Processor.Indicator.REGISTER_Y, this._formatDecimal(this._y));
+        this._setIndicator(Processor.Indicator.REGISTER_Z, this._formatDecimal(this._z));
+        this._setIndicator(Processor.Indicator.REGISTER_T, this._formatDecimal(this._t));
+        this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
 
         this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
-        this._setIndicator(Processor.Indicator.INDICATOR_E, "");
+        this._setIndicator(Processor.Indicator.INDICATOR_E, this._toIndicatorE());
     }
 
-    _updateX() {
-        this._setIndicator(Processor.Indicator.REGISTER_X, this._x.toString());
-        this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
-    }
-    
-    init() {
-        this._updateIndicators();
+    _updateIndicatorsAfterOp() {
+        this._setIndicator(Processor.Indicator.REGISTER_X, this._formatDecimal(this._x));
+        this._setIndicator(Processor.Indicator.REGISTER_Y, this._formatDecimal(this._y));
+        this._setIndicator(Processor.Indicator.REGISTER_Z, this._formatDecimal(this._z));
+        this._setIndicator(Processor.Indicator.REGISTER_T, this._formatDecimal(this._t));
+        this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
+
+        this._setIndicator(Processor.Indicator.INDICATOR, this._formatDecimalMantissa(this._x));
+        this._setIndicator(Processor.Indicator.INDICATOR_E, this._formatDecimalExponent(this._x));
     }
 
-    clearX() {
-        this._x = Decimal.Decimal(0);
-        this._clear();
-        this._updateIndicators();
-    }
-
-    pushX() {
+    _pushX() {
         this._x1 = this._x;
     }
 
-    popX() {
-        this.push();
+    _popX() {
         this._x = this._x1;
     }
 
-    push() {
+    _push() {
         this._t = this._z;
         this._z = this._y;
         this._y = this._x;
     }
 
-    pop() {
-        this.pushX();
+    _pop() {
         this._x = this._y;
         this._y = this._z;
         this._z = this._t;
     }
 
-    swap() {
-        let temporal = this._y;
-        this._y = this._x;
-        this._x = temporal;
-    }
-
-    negate() {
-        // this._x.negate();
-    }
+    /*    setE() {
+            if(this._number.length == 0) {
+                this._number.push(1);
+                this._number._point = 1;
+            }
+            this._e = true;
+        }
+    */
 
     point() {
         if (this._isE()) {
@@ -233,20 +293,11 @@ var Processor = class Processor {
         }
     }
 
-/*    setE() {
-        if(this._number.length == 0) {
-            this._number.push(1);
-            this._number._point = 1;
-        }
-        this._e = true;
-    }
-*/
-
     digit(value) {
         if (!this._isE()) {
-            if(this._number.length < Processor.Precision.MAX) {
+            if (this._number.length < Processor.Precision.MAX) {
                 this._number.push(value);
-                if(!this._isReal()) {
+                if (!this._isReal()) {
                     this._point = this._number.length;
                 }
             }
@@ -255,7 +306,71 @@ var Processor = class Processor {
             this._numberE[1] = value;
         }
         this._x = this._toDecimal();
-        this._updateX();
+        this._updateIndicators();
+    }
+
+    negate() {
+        if (this._isE()) {
+        } else {
+            this._x.negate();
+            this._updateIndicatorsAfterOp();
+            this._clear();
+        }
+    }
+
+    clearX() {
+        this._x = Decimal.Decimal(0);
+        this._clear();
+        this._updateIndicatorsAfterOp();
+    }
+
+    up() {
+        this._push();
+        this._updateIndicatorsAfterOp();
+        this._clear();
+    }
+
+    swap() {
+        this._pushX();
+        this._r = this._y;
+        this._y = this._x;
+        this._x = this._r;
+        this._updateIndicatorsAfterOp();
+        this._clear();
+    }
+
+    backX() {
+        this._push();
+        this._popX();
+        this._updateIndicatorsAfterOp();
+        this._clear();
+    }
+
+    add() {
+        this._pushX();
+        this._r = this._y.plus(this._x);
+        this._pop();
+        this._x = this._r;
+        this._updateIndicatorsAfterOp();
+        this._clear();
+    }
+
+    subtract() {
+        this._pushX();
+        this._r = this._y.minus(this._x);
+        this._pop();
+        this._x = this._r;
+        this._updateIndicatorsAfterOp();
+        this._clear();
+    }
+
+    multiply() {
+        this._pushX();
+        this._r = this._y.times(this._x);
+        this._pop();
+        this._x = this._r;
+        this._updateIndicatorsAfterOp();
+        this._clear();
     }
 
 };

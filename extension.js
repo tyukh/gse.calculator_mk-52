@@ -245,7 +245,7 @@ const Indicator = GObject.registerClass(
                     break;
 
                 case Processor.Processor.Indicator.INDICATOR_E:
-                    this._indicator.set_text(value);
+                    this._indicatorE.set_text(value);
                     break;
 
                 case Processor.Processor.Indicator.REGISTER_X:
@@ -320,20 +320,18 @@ const Indicator = GObject.registerClass(
                     break;
 
                 case Processor.Processor.Glyph.PLUS:
-
+                    this._processor.add();
                     break;
 
-
                 case Processor.Processor.Glyph.MINUS:
-
+                    this._processor.subtract();
                     break;
 
                 case Processor.Processor.Glyph.MULTIPLY:
-
+                    this._processor.multiply();
                     break;
 
                 case Processor.Processor.Glyph.DIVIDE:
-
 
                     break;
 
@@ -343,7 +341,7 @@ const Indicator = GObject.registerClass(
 
 
                 case Processor.Processor.Glyph.UP:
-                    this._processor.push();
+                    this._processor.up();
                     break;
 
 
@@ -352,7 +350,7 @@ const Indicator = GObject.registerClass(
                     break;
 
                 case Processor.Processor.Glyph.BACK_X:
-                    this._processor.popX();
+                    this._processor.backX();
                     break;
 
                 case Processor.Processor.Glyph.CLEAR_X:
