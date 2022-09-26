@@ -96,14 +96,14 @@ var Processor = class Processor {
     };
 
     _clear() {
-        this._sign = false;
-        this._number = [];
-        this._point = 0;
+        this._mantissaSign = false;
+        this._mantissa = [];
+        this._fraction = 0;
         this._real = false;
 
         this._e = false;
-        this._signE = false;
-        this._numberE = [0, 0];
+        this._exponentSign = false;
+        this._exponent = [0, 0];
 
         this._error = false;
     }
@@ -123,24 +123,24 @@ var Processor = class Processor {
     _toDecimal() {
         let value = Decimal.Decimal(0);
 
-        if (this._number.length == 0)
+        if (this._mantissa.length == 0)
             return value;
 
-        for (let index = 0; index < this._number.length; index++) {
-            if (index < this._point) {
+        for (let index = 0; index < this._mantissa.length; index++) {
+            if (index < this._fraction) {
                 value = value.times(Decimal.Decimal(10));
-                value = value.plus(Decimal.Decimal(this._number[index]));
+                value = value.plus(Decimal.Decimal(this._mantissa[index]));
             } else {
-                value = value.plus(Decimal.Decimal.div(this._number[index], Decimal.Decimal.pow(10, value.decimalPlaces() + 1)));
+                value = value.plus(Decimal.Decimal.div(this._mantissa[index], Decimal.Decimal.pow(10, value.decimalPlaces() + 1)));
             }
         }
 
-        let power = this._numberE[0] * 10 + this._numberE[1];
-        if (this._signE == true)
+        let power = this._exponent[0] * 10 + this._exponent[1];
+        if (this._exponentSign == true)
             power = -power;
         value = value.times(Decimal.Decimal.pow(10, power));
 
-        if (this._sign == true)
+        if (this._mantissaSign == true)
             value = value.negate();
 
         return value;
@@ -149,11 +149,11 @@ var Processor = class Processor {
     _toIndicator() {
         let string = "";
 
-        if (this._number.length > 0) {
+        if (this._mantissa.length > 0) {
             let index = 1;
-            this._number.forEach(digit => {
+            this._mantissa.forEach(digit => {
                 string = string + digit.toString();
-                if (index == this._point) {
+                if (index == this._fraction) {
                     string = string + ".";
                 }
                 index++;
@@ -162,7 +162,7 @@ var Processor = class Processor {
             string = string + "0.";
         }
 
-        if (this._sign == true) {
+        if (this._mantissaSign == true) {
             string = "-" + string;
         }
 
@@ -172,10 +172,10 @@ var Processor = class Processor {
     _toIndicatorE() {
         let string = "";
 
-        if ((this._numberE[0] != 0) && (this._numberE[1] != 0)) {
-            string = string + this._numberE[0].toString() + this._numberE[1].toString();
+        if ((this._exponent[0] != 0) && (this._exponent[1] != 0)) {
+            string = string + this._exponent[0].toString() + this._exponent[1].toString();
 
-            if (this._signE == true) {
+            if (this._exponentSign == true) {
                 string = "-" + string;
             }
         }
@@ -225,7 +225,7 @@ var Processor = class Processor {
                         break;
                 }
             });
-            return string[0].concat(exp); 
+            return string[0].concat(exp);
         }
         return string[0];
     }
@@ -234,24 +234,28 @@ var Processor = class Processor {
         this._indicatorsCallback(indicator, value);
     }
 
-    _updateIndicators() {
+    _updateRegisterIndicators() {
         this._setIndicator(Processor.Indicator.REGISTER_X, this._formatDecimal(this._x));
         this._setIndicator(Processor.Indicator.REGISTER_Y, this._formatDecimal(this._y));
         this._setIndicator(Processor.Indicator.REGISTER_Z, this._formatDecimal(this._z));
         this._setIndicator(Processor.Indicator.REGISTER_T, this._formatDecimal(this._t));
         this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
+    }
 
+    _updateIndicatorsAfterMantissa() {
+        this._updateRegisterIndicators();
         this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
         this._setIndicator(Processor.Indicator.INDICATOR_E, this._toIndicatorE());
     }
 
-    _updateIndicatorsAfterOp() {
-        this._setIndicator(Processor.Indicator.REGISTER_X, this._formatDecimal(this._x));
-        this._setIndicator(Processor.Indicator.REGISTER_Y, this._formatDecimal(this._y));
-        this._setIndicator(Processor.Indicator.REGISTER_Z, this._formatDecimal(this._z));
-        this._setIndicator(Processor.Indicator.REGISTER_T, this._formatDecimal(this._t));
-        this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
+    _updateIndicatorsAfterExponent() {
+        this._updateRegisterIndicators();
+        this._setIndicator(Processor.Indicator.INDICATOR, this._formatDecimalMantissa(this._x));
+        this._setIndicator(Processor.Indicator.INDICATOR_E, this._toIndicatorE());
+    }
 
+    _updateIndicatorsAfterOp() {
+        this._updateRegisterIndicators();
         this._setIndicator(Processor.Indicator.INDICATOR, this._formatDecimalMantissa(this._x));
         this._setIndicator(Processor.Indicator.INDICATOR_E, this._formatDecimalExponent(this._x));
     }
@@ -276,14 +280,13 @@ var Processor = class Processor {
         this._z = this._t;
     }
 
-    /*    setE() {
-            if(this._number.length == 0) {
-                this._number.push(1);
-                this._number._point = 1;
-            }
-            this._e = true;
+    setE() {
+        if (this._mantissa.length == 0) {
+            this._mantissa.push(1);
+            this._mantissa._fraction = 1;
         }
-    */
+        this._e = true;
+    }
 
     point() {
         if (this._isE()) {
@@ -295,18 +298,20 @@ var Processor = class Processor {
 
     digit(value) {
         if (!this._isE()) {
-            if (this._number.length < Processor.Precision.MAX) {
-                this._number.push(value);
+            if (this._mantissa.length < Processor.Precision.MAX) {
+                this._mantissa.push(value);
                 if (!this._isReal()) {
-                    this._point = this._number.length;
+                    this._fraction = this._mantissa.length;
                 }
             }
+            this._x = this._toDecimal();
+            this._updateIndicatorsAfterMantissa();
         } else {
-            this._numberE[0] = this._numberE[1];
-            this._numberE[1] = value;
+            this._exponent[0] = this._exponent[1];
+            this._exponent[1] = value;
+            this._x = this._toDecimal();
+            this._updateIndicatorsAfterExponent();
         }
-        this._x = this._toDecimal();
-        this._updateIndicators();
     }
 
     negate() {

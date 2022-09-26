@@ -77,6 +77,8 @@ const Indicator = GObject.registerClass(
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this.menu.addMenuItem(keyboardArea);
 
+            this.menu.actor.connectObject('key-press-event', this._onKeyboardKeyEvent.bind(this), this);
+
             this._processor.init();
         }
 
@@ -238,43 +240,8 @@ const Indicator = GObject.registerClass(
             keyboardArea.actor.add_child(keyboardBox);
         }
 
-        _onIndicatorSet(indicator, value) {
-            switch (indicator) {
-                case Processor.Processor.Indicator.INDICATOR:
-                    this._indicator.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.INDICATOR_E:
-                    this._indicatorE.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.REGISTER_X:
-                    this._xRegister.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.REGISTER_Y:
-                    this._yRegister.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.REGISTER_Z:
-                    this._zRegister.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.REGISTER_T:
-                    this._tRegister.set_text(value);
-                    break;
-
-                case Processor.Processor.Indicator.REGISTER_X1:
-                    this._x1Register.set_text(value);
-                    break;
-
-                default:
-                    return;
-            }
-        }
-
-        _onKeyboardDispatcher(button) {
-            switch (button.get_label()) {
+        _processorExecute(action) {
+            switch (action) {
                 case Processor.Processor.Glyph.ZERO:
                     this._processor.digit(0);
                     break;
@@ -360,7 +327,165 @@ const Indicator = GObject.registerClass(
                 default:
                     return;
             }
+        }
 
+        _onIndicatorSet(indicator, value) {
+            switch (indicator) {
+                case Processor.Processor.Indicator.INDICATOR:
+                    this._indicator.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.INDICATOR_E:
+                    this._indicatorE.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_X:
+                    this._xRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_Y:
+                    this._yRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_Z:
+                    this._zRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_T:
+                    this._tRegister.set_text(value);
+                    break;
+
+                case Processor.Processor.Indicator.REGISTER_X1:
+                    this._x1Register.set_text(value);
+                    break;
+
+                default:
+                    return;
+            }
+        }
+
+        _onKeyboardDispatcher(button) {
+            this._processorExecute(button.get_label());
+        }
+
+        _onKeyboardKeyEvent(actor, event) {
+            let state = event.get_state();
+
+            // if user has a modifier down (except capslock, numlock, alt)
+            // then don't handle the key press here
+            state &= ~Clutter.ModifierType.LOCK_MASK;
+            state &= ~Clutter.ModifierType.MOD1_MASK;
+            state &= ~Clutter.ModifierType.MOD2_MASK;
+            state &= Clutter.ModifierType.MODIFIER_MASK;
+
+            if (state)
+                return Clutter.EVENT_PROPAGATE;
+
+            let symbol = event.get_key_symbol();
+
+            if ((event.get_state() & Clutter.ModifierType.MOD1_MASK) != 0) {
+                switch (symbol) {
+                    case Clutter.KEY_KP_Subtract:
+                        this._processorExecute(Processor.Processor.Glyph.SIGN);
+                        break;
+
+                    case Clutter.KEY_KP_Enter:
+                        this._processorExecute(Processor.Processor.Glyph.SWAP);
+                        break;
+
+                    case Clutter.KEY_BackSpace:
+                        this._processorExecute(Processor.Processor.Glyph.BACK_X);
+                        break;
+
+                    default:
+                        return Clutter.EVENT_PROPAGATE;
+                }
+            } else {
+                switch (symbol) {
+                    case Clutter.KEY_KP_0:
+                    case Clutter.KEY_KP_Insert:
+                        this._processorExecute(Processor.Processor.Glyph.ZERO);
+                        break;
+
+                    case Clutter.KEY_KP_1:
+                    case Clutter.KEY_KP_End:
+                        this._processorExecute(Processor.Processor.Glyph.ONE);
+                        break;
+
+                    case Clutter.KEY_KP_2:
+                    case Clutter.KEY_KP_Down:
+                        this._processorExecute(Processor.Processor.Glyph.TWO);
+                        break;
+
+                    case Clutter.KEY_KP_3:
+                    case Clutter.KEY_KP_Page_Down:
+                        this._processorExecute(Processor.Processor.Glyph.THREE);
+                        break;
+
+                    case Clutter.KEY_KP_4:
+                    case Clutter.KEY_KP_Left:
+                        this._processorExecute(Processor.Processor.Glyph.FOUR);
+                        break;
+
+                    case Clutter.KEY_KP_5:
+                    case Clutter.KEY_KP_Begin:
+                        this._processorExecute(Processor.Processor.Glyph.FIVE);
+                        break;
+
+                    case Clutter.KEY_KP_6:
+                    case Clutter.KEY_KP_Right:
+                        this._processorExecute(Processor.Processor.Glyph.SIX);
+                        break;
+
+                    case Clutter.KEY_KP_7:
+                    case Clutter.KEY_KP_Home:
+                        this._processorExecute(Processor.Processor.Glyph.SEVEN);
+                        break;
+
+                    case Clutter.KEY_KP_8:
+                    case Clutter.KEY_KP_Up:
+                        this._processorExecute(Processor.Processor.Glyph.EIGHT);
+                        break;
+
+                    case Clutter.KEY_KP_9:
+                    case Clutter.KEY_KP_Page_Up:
+                        this._processorExecute(Processor.Processor.Glyph.NINE);
+                        break;
+
+                    case Clutter.KEY_KP_Decimal:
+                    case Clutter.KEY_KP_Delete:
+                        this._processorExecute(Processor.Processor.Glyph.PERIOD);
+                        break;
+
+                    case Clutter.KEY_KP_Add:
+                        this._processorExecute(Processor.Processor.Glyph.PLUS);
+                        break;
+
+                    case Clutter.KEY_KP_Subtract:
+                        this._processorExecute(Processor.Processor.Glyph.MINUS);
+                        break;
+
+                    case Clutter.KEY_KP_Multiply:
+                        this._processorExecute(Processor.Processor.Glyph.MULTIPLY);
+                        break;
+
+                    case Clutter.KEY_KP_Divide:
+                        this._processorExecute(Processor.Processor.Glyph.DIVIDE);
+                        break;
+
+                    case Clutter.KEY_KP_Enter:
+                        this._processorExecute(Processor.Processor.Glyph.UP);
+                        break;
+
+                    case Clutter.KEY_BackSpace:
+                        this._processorExecute(Processor.Processor.Glyph.CLEAR_X);
+                        break;
+
+                    default:
+                        return Clutter.EVENT_PROPAGATE;
+                }
+            }
+            return Clutter.EVENT_STOP;
         }
     }
 );
