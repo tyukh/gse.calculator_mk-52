@@ -4,7 +4,7 @@
   "uuid": "gse.panel-calc-rpn@tyukh.github.io",
   "version": 1,
   "shell-version": [
-    "42"
+    "42", "43"
   ],
   "url": "https://github.com/tyukh/gse.panel-calc-rpn-tyukh.github.io",
   "gettext-domain": "gse.panel-calc-rpn@tyukh.github.io"
