@@ -72,27 +72,36 @@ var Processor = class Processor {
         REGISTER_X1: 6
     }
 
-    static Glyph = {
-        ZERO: "0",
-        ONE: "1",
-        TWO: "2",
-        THREE: "3",
-        FOUR: "4",
-        FIVE: "5",
-        SIX: "6",
-        SEVEN: "7",
-        EIGHT: "8",
-        NINE: "9",
-        PERIOD: ".",
-        PLUS: "+",
-        MINUS: "-",
-        MULTIPLY: "\u{00D7}",
-        DIVIDE: "\u{00F7}",
-        SIGN: "\u{00B1}",
-        UP: "\u{2191}",
-        SWAP: "\u{27F7}",
-        BACK_X: "BX",
-        CLEAR_X: "CX"
+    static Key = {
+        ZERO: 0,
+        ONE: 1,
+        TWO: 2,
+        THREE: 3,
+        FOUR: 4,
+        FIVE: 5,
+        SIX: 6,
+        SEVEN: 7,
+        EIGHT: 8,
+        NINE: 9,
+
+        PERIOD: 10,
+        SIGN: 11,
+        ENTER_E: 12,
+
+        PUSH: 20,
+        SWAP: 21,
+        CLEAR_X: 22,
+        BACK_X: 23,
+
+        PLUS: 30,
+        MINUS: 31,
+        MULTIPLY: 32,
+        DIVIDE: 33,
+
+        F: 90,
+        K: 91,
+
+        RESERVED_NULL: 9999
     };
 
     _clear() {
@@ -329,7 +338,7 @@ var Processor = class Processor {
         this._updateIndicatorsAfterOp();
     }
 
-    up() {
+    push() {
         this._push();
         this._updateIndicatorsAfterOp();
         this._clear();

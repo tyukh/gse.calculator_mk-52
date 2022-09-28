@@ -33,6 +33,36 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Processor = Me.imports.processor;
 
+const Key = GObject.registerClass({
+    GTypeName: 'Key',
+    Properties: {
+        'button-id': GObject.ParamSpec.uint(
+            'button-id',
+            'Button Id',
+            'A read-write integer property',
+            GObject.ParamFlags.READWRITE,
+            0
+        ),
+    }
+}, class Key extends St.Button {
+    constructor(properties = {}) {
+        super(properties);
+    }
+
+    get buttonId() {
+        if (this._buttonId === undefined)
+            this._buttonId = null;
+        return this._buttonId;
+    }
+
+    set buttonId(value) {
+        if (this._buttonId === value)
+            return;
+        this._buttonId = value;
+    }
+});
+
+
 const Indicator = GObject.registerClass(
     class Indicator extends PanelMenu.Button {
         _init() {
@@ -187,32 +217,171 @@ const Indicator = GObject.registerClass(
 
             let keyMatrix = [
                 [
-                    { label: Processor.Processor.Glyph.SEVEN, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.EIGHT, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.NINE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.MINUS, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.DIVIDE, style_class: 'panel-calc-rpn-grayButton' }
+                    {
+                        buttonId: Processor.Processor.Key.F,
+                        label: _("F"),
+                        labelF: "",
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-yellowButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.K,
+                        label: _("K"),
+                        labelF: "",
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-blueButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.RESERVED_NULL,
+                    }
                 ],
                 [
-                    { label: Processor.Processor.Glyph.FOUR, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.FIVE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.SIX, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.PLUS, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.MULTIPLY, style_class: 'panel-calc-rpn-grayButton' }
+                    {
+                        buttonId: Processor.Processor.Key.SEVEN,
+                        label: _("7"),
+                        labelF: _("sin"),
+                        labelK: _("[x]"),
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.EIGHT,
+                        label: _("8"),
+                        labelF: _("cos"),
+                        labelK: _("{x}"),
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.NINE,
+                        label: _("9"),
+                        labelF: _("tg"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.MINUS,
+                        label: _("-"),
+                        labelF: _("\u{221A}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.DIVIDE,
+                        label: _("\u{00F7}"),
+                        labelF: _("1/x"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    }
                 ],
                 [
-                    { label: Processor.Processor.Glyph.ONE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.TWO, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.THREE, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.SWAP, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.UP, style_class: 'panel-calc-rpn-grayButton' }
+                    {
+                        buttonId: Processor.Processor.Key.FOUR,
+                        label: _("4"),
+                        labelF: _("sin\u{207B}\u{00B9}"),
+                        labelK: _("|x|"),
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.FIVE,
+                        label: _("5"),
+                        labelF: _("cos\u{207B}\u{00B9}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.SIX,
+                        label: _("6"),
+                        labelF: _("tg\u{207B}\u{00B9}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.PLUS,
+                        label: _("+"),
+                        labelF: _("\u{03C0}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.MULTIPLY,
+                        label: _("\u{00D7}"),
+                        labelF: _("x\u{00B2}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    }
                 ],
                 [
-                    { label: Processor.Processor.Glyph.ZERO, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.PERIOD, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.SIGN, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.BACK_X, style_class: 'panel-calc-rpn-grayButton' },
-                    { label: Processor.Processor.Glyph.CLEAR_X, style_class: 'panel-calc-rpn-redButton' }
+                    {
+                        buttonId: Processor.Processor.Key.ONE,
+                        label: _("1"),
+                        labelF: _("e\u{02E3}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.TWO,
+                        label: _("2"),
+                        labelF: _("lg"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.THREE,
+                        label: _("3"),
+                        labelF: _("ln"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.SWAP,
+                        label: _("\u{27F7}"),
+                        labelF: _("x\u{02b8}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.PUSH,
+                        label: _("E\u{2191}"),
+                        labelF: _("Bx"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    }
+                ],
+                [
+                    {
+                        buttonId: Processor.Processor.Key.ZERO,
+                        label: _("0"),
+                        labelF: _("10\u{02E3}"),
+                        labelK: _("NOP"),
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.PERIOD,
+                        label: _("."),
+                        labelF: _("\u{2941}"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.SIGN,
+                        label: _("/-/"),
+                        labelF: "",
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.ENTER_E,
+                        label: _("EE"),
+                        labelF: "",
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-grayButton'
+                    },
+                    {
+                        buttonId: Processor.Processor.Key.CLEAR_X,
+                        label: _("Cx"),
+                        labelF: _("CF"),
+                        labelK: "",
+                        style_class: 'panel-calc-rpn-redButton'
+                    }
                 ]
             ];
 
@@ -224,15 +393,57 @@ const Indicator = GObject.registerClass(
                     style_class: 'panel-calc-rpn-BoxLayout'
                 });
                 row.forEach(key => {
-                    let keyButton = new St.Button({
-                        label: key.label,
-                        style_class: key.style_class,
-                        x_expand: true,
-                        x_align: Clutter.ActorAlign.CENTER
-                    });
-                    keyButton.set_style(`font-family: ${this._fontFamily}`);
-                    keyButton.connect('clicked', this._onKeyboardDispatcher.bind(this));
-                    lineKeyboardBox.add_actor(keyButton);
+                    if (key.buttonId != Processor.Processor.Key.RESERVED_NULL) {
+                        let keyButton = new Key({
+                            label: key.label,
+                            style_class: key.style_class,
+                            x_expand: false,
+                            x_align: Clutter.ActorAlign.START,
+                            y_align: Clutter.ActorAlign.CENTER,
+                        });
+                        keyButton.buttonId = key.buttonId;
+                        keyButton.set_style(`font-family: ${this._fontFamily}`);
+                        keyButton.connect('clicked', this._onKeyboardDispatcher.bind(this));
+                        lineKeyboardBox.add_actor(keyButton);
+                    } else {
+                        let controlBox = new St.BoxLayout({
+                            vertical: false,
+                            x_expand: true,
+                            x_align: Clutter.ActorAlign.FILL,
+                            y_align: Clutter.ActorAlign.FILL,
+                            style_class: 'panel-calc-rpn-controlBoxLayout'
+                        });
+                        let settingsButton = new St.Button({
+                            //                            can_focus: true, 
+                            reactive: true,
+                            track_hover: true,
+                            icon_name: 'org.gnome.Settings-symbolic',
+                            style_class: 'panel-calc-rpn-controlButton',
+                            x_align: Clutter.ActorAlign.END,
+                            y_align: Clutter.ActorAlign.CENTER
+                        });
+                        let helpButton = new St.Button({
+                            //                            can_focus: true, 
+                            reactive: true,
+                            track_hover: true,
+                            icon_name: 'help-about-symbolic',
+                            style_class: 'panel-calc-rpn-controlButton',
+                            x_align: Clutter.ActorAlign.END,
+                            y_align: Clutter.ActorAlign.CENTER
+                        });
+                        settingsButton.connect('clicked', this._onSettingsButtonClicked.bind(this));
+                        helpButton.connect('clicked', this._onHelpButtonClicked.bind(this));
+                        
+                        controlBox.add_actor(new St.BoxLayout({
+                            vertical: false,
+                            x_expand: true,
+                            x_align: Clutter.ActorAlign.FILL,
+                            y_align: Clutter.ActorAlign.FILL
+                        }));
+                        controlBox.add_actor(settingsButton);
+                        controlBox.add_actor(helpButton);
+                        lineKeyboardBox.add_actor(controlBox);
+                    }
                 })
                 keyboardBox.add_actor(lineKeyboardBox);
             })
@@ -242,85 +453,83 @@ const Indicator = GObject.registerClass(
 
         _processorExecute(action) {
             switch (action) {
-                case Processor.Processor.Glyph.ZERO:
+                case Processor.Processor.Key.ZERO:
                     this._processor.digit(0);
                     break;
 
-                case Processor.Processor.Glyph.ONE:
+                case Processor.Processor.Key.ONE:
                     this._processor.digit(1);
                     break;
 
-                case Processor.Processor.Glyph.TWO:
+                case Processor.Processor.Key.TWO:
                     this._processor.digit(2);
                     break;
 
-                case Processor.Processor.Glyph.THREE:
+                case Processor.Processor.Key.THREE:
                     this._processor.digit(3);
                     break;
 
-                case Processor.Processor.Glyph.FOUR:
+                case Processor.Processor.Key.FOUR:
                     this._processor.digit(4);
                     break;
 
-                case Processor.Processor.Glyph.FIVE:
+                case Processor.Processor.Key.FIVE:
                     this._processor.digit(5);
                     break;
 
-                case Processor.Processor.Glyph.SIX:
+                case Processor.Processor.Key.SIX:
                     this._processor.digit(6);
                     break;
 
-                case Processor.Processor.Glyph.SEVEN:
+                case Processor.Processor.Key.SEVEN:
                     this._processor.digit(7);
                     break;
 
-                case Processor.Processor.Glyph.EIGHT:
+                case Processor.Processor.Key.EIGHT:
                     this._processor.digit(8);
                     break;
 
-                case Processor.Processor.Glyph.NINE:
+                case Processor.Processor.Key.NINE:
                     this._processor.digit(9);
                     break;
 
-                case Processor.Processor.Glyph.PERIOD:
+                case Processor.Processor.Key.PERIOD:
                     this._processor.point();
                     break;
 
-                case Processor.Processor.Glyph.PLUS:
+                case Processor.Processor.Key.PLUS:
                     this._processor.add();
                     break;
 
-                case Processor.Processor.Glyph.MINUS:
+                case Processor.Processor.Key.MINUS:
                     this._processor.subtract();
                     break;
 
-                case Processor.Processor.Glyph.MULTIPLY:
+                case Processor.Processor.Key.MULTIPLY:
                     this._processor.multiply();
                     break;
 
-                case Processor.Processor.Glyph.DIVIDE:
+                case Processor.Processor.Key.DIVIDE:
 
                     break;
 
-                case Processor.Processor.Glyph.SIGN:
+                case Processor.Processor.Key.SIGN:
                     this._processor.negate();
                     break;
 
-
-                case Processor.Processor.Glyph.UP:
-                    this._processor.up();
+                case Processor.Processor.Key.PUSH:
+                    this._processor.push();
                     break;
 
-
-                case Processor.Processor.Glyph.SWAP:
+                case Processor.Processor.Key.SWAP:
                     this._processor.swap();
                     break;
 
-                case Processor.Processor.Glyph.BACK_X:
+                case Processor.Processor.Key.BACK_X:
                     this._processor.backX();
                     break;
 
-                case Processor.Processor.Glyph.CLEAR_X:
+                case Processor.Processor.Key.CLEAR_X:
                     this._processor.clearX();
                     break;
 
@@ -365,7 +574,7 @@ const Indicator = GObject.registerClass(
         }
 
         _onKeyboardDispatcher(button) {
-            this._processorExecute(button.get_label());
+            this._processorExecute(button.buttonId);
         }
 
         _onKeyboardKeyEvent(actor, event) {
@@ -386,15 +595,15 @@ const Indicator = GObject.registerClass(
             if ((event.get_state() & Clutter.ModifierType.MOD1_MASK) != 0) {
                 switch (symbol) {
                     case Clutter.KEY_KP_Subtract:
-                        this._processorExecute(Processor.Processor.Glyph.SIGN);
+                        this._processorExecute(Processor.Processor.Key.SIGN);
                         break;
 
                     case Clutter.KEY_KP_Enter:
-                        this._processorExecute(Processor.Processor.Glyph.SWAP);
+                        this._processorExecute(Processor.Processor.Key.SWAP);
                         break;
 
                     case Clutter.KEY_BackSpace:
-                        this._processorExecute(Processor.Processor.Glyph.BACK_X);
+                        this._processorExecute(Processor.Processor.Key.BACK_X);
                         break;
 
                     default:
@@ -404,81 +613,81 @@ const Indicator = GObject.registerClass(
                 switch (symbol) {
                     case Clutter.KEY_KP_0:
                     case Clutter.KEY_KP_Insert:
-                        this._processorExecute(Processor.Processor.Glyph.ZERO);
+                        this._processorExecute(Processor.Processor.Key.ZERO);
                         break;
 
                     case Clutter.KEY_KP_1:
                     case Clutter.KEY_KP_End:
-                        this._processorExecute(Processor.Processor.Glyph.ONE);
+                        this._processorExecute(Processor.Processor.Key.ONE);
                         break;
 
                     case Clutter.KEY_KP_2:
                     case Clutter.KEY_KP_Down:
-                        this._processorExecute(Processor.Processor.Glyph.TWO);
+                        this._processorExecute(Processor.Processor.Key.TWO);
                         break;
 
                     case Clutter.KEY_KP_3:
                     case Clutter.KEY_KP_Page_Down:
-                        this._processorExecute(Processor.Processor.Glyph.THREE);
+                        this._processorExecute(Processor.Processor.Key.THREE);
                         break;
 
                     case Clutter.KEY_KP_4:
                     case Clutter.KEY_KP_Left:
-                        this._processorExecute(Processor.Processor.Glyph.FOUR);
+                        this._processorExecute(Processor.Processor.Key.FOUR);
                         break;
 
                     case Clutter.KEY_KP_5:
                     case Clutter.KEY_KP_Begin:
-                        this._processorExecute(Processor.Processor.Glyph.FIVE);
+                        this._processorExecute(Processor.Processor.Key.FIVE);
                         break;
 
                     case Clutter.KEY_KP_6:
                     case Clutter.KEY_KP_Right:
-                        this._processorExecute(Processor.Processor.Glyph.SIX);
+                        this._processorExecute(Processor.Processor.Key.SIX);
                         break;
 
                     case Clutter.KEY_KP_7:
                     case Clutter.KEY_KP_Home:
-                        this._processorExecute(Processor.Processor.Glyph.SEVEN);
+                        this._processorExecute(Processor.Processor.Key.SEVEN);
                         break;
 
                     case Clutter.KEY_KP_8:
                     case Clutter.KEY_KP_Up:
-                        this._processorExecute(Processor.Processor.Glyph.EIGHT);
+                        this._processorExecute(Processor.Processor.Key.EIGHT);
                         break;
 
                     case Clutter.KEY_KP_9:
                     case Clutter.KEY_KP_Page_Up:
-                        this._processorExecute(Processor.Processor.Glyph.NINE);
+                        this._processorExecute(Processor.Processor.Key.NINE);
                         break;
 
                     case Clutter.KEY_KP_Decimal:
                     case Clutter.KEY_KP_Delete:
-                        this._processorExecute(Processor.Processor.Glyph.PERIOD);
+                        this._processorExecute(Processor.Processor.Key.PERIOD);
                         break;
 
                     case Clutter.KEY_KP_Add:
-                        this._processorExecute(Processor.Processor.Glyph.PLUS);
+                        this._processorExecute(Processor.Processor.Key.PLUS);
                         break;
 
                     case Clutter.KEY_KP_Subtract:
-                        this._processorExecute(Processor.Processor.Glyph.MINUS);
+                        this._processorExecute(Processor.Processor.Key.MINUS);
                         break;
 
                     case Clutter.KEY_KP_Multiply:
-                        this._processorExecute(Processor.Processor.Glyph.MULTIPLY);
+                        this._processorExecute(Processor.Processor.Key.MULTIPLY);
                         break;
 
                     case Clutter.KEY_KP_Divide:
-                        this._processorExecute(Processor.Processor.Glyph.DIVIDE);
+                        this._processorExecute(Processor.Processor.Key.DIVIDE);
                         break;
 
                     case Clutter.KEY_KP_Enter:
-                        this._processorExecute(Processor.Processor.Glyph.UP);
+                        this._processorExecute(Processor.Processor.Key.PUSH);
                         break;
 
                     case Clutter.KEY_BackSpace:
-                        this._processorExecute(Processor.Processor.Glyph.CLEAR_X);
+                        this._processorExecute(Processor.Processor.Key.CLEAR_X);
                         break;
 
                     default:
@@ -486,6 +695,12 @@ const Indicator = GObject.registerClass(
                 }
             }
             return Clutter.EVENT_STOP;
+        }
+
+        _onSettingsButtonClicked() {
+        }
+
+        _onHelpButtonClicked() {
         }
     }
 );

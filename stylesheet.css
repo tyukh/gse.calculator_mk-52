@@ -79,8 +79,8 @@
     font-weight: bold;
     margin: 0.2em;
     color: black;
-    width: 2.5em;
-    height: 2.5em;
+    width: 3em;
+    height: 3em;
 }
 
 .panel-calc-rpn-grayButton:hover {
@@ -95,10 +95,59 @@
     font-weight: bold;
     margin: 0.2em;
     color: black;
-    width: 2.5em;
-    height: 2.5em;
+    width: 3em;
+    height: 3em;
 }
 
 .panel-calc-rpn-redButton:hover {
     border-color: white;
+}
+
+.panel-calc-rpn-yellowButton {
+    border-radius: 0.5em;
+    border-width: 0.125em;
+    border-color: black;
+    background-color: yellow;
+    font-weight: bold;
+    margin: 0.2em;
+    color: black;
+    width: 3em;
+    height: 3em;
+}
+
+.panel-calc-rpn-yellowButton:hover {
+    border-color: white;
+}
+
+.panel-calc-rpn-blueButton {
+    border-radius: 0.5em;
+    border-width: 0.125em;
+    border-color: black;
+    background-color: steelblue;
+    font-weight: bold;
+    margin: 0.2em;
+    color: white;
+    width: 3em;
+    height: 3em;
+}
+
+.panel-calc-rpn-blueButton:hover {
+    border-color: white;
+}
+
+.panel-calc-rpn-controlBoxLayout {
+    padding: 0em;
+    margin: 0em;
+}
+
+.panel-calc-rpn-controlButton {
+    color: grey;
+    width: 1.5em;
+    height: 1.5em; 
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+}
+
+.panel-calc-rpn-controlButton:hover {
+    color: white;
 }
