@@ -86,6 +86,8 @@ const Indicator = GObject.registerClass(
             //-- Init Indicator
             let indicatorArea = new PopupMenu.PopupBaseMenuItem({
                 reactive: false,
+                can_focus: false,
+                activate: false,
                 style_class: 'panel-calc-rpn-PopupBaseMenuItem'
             });
             indicatorArea.setOrnament(PopupMenu.Ornament.HIDDEN);
@@ -96,6 +98,8 @@ const Indicator = GObject.registerClass(
             //-- Init Keyboard
             let keyboardArea = new PopupMenu.PopupBaseMenuItem({
                 reactive: false,
+                can_focus: false,
+                activate: false,
                 style_class: 'panel-calc-rpn-PopupBaseMenuItem'
             });
             keyboardArea.setOrnament(PopupMenu.Ornament.HIDDEN);
@@ -117,6 +121,7 @@ const Indicator = GObject.registerClass(
                 vertical: false,
                 x_expand: true,
                 y_expand: true,
+                x_align: Clutter.ActorAlign.FILL,
                 y_align: Clutter.ActorAlign.CENTER,
                 style_class: 'panel-calc-rpn-registerBoxLayout'
             });
@@ -124,8 +129,9 @@ const Indicator = GObject.registerClass(
             let register = new St.Label({
                 text: "",
                 x_expand: true,
+                y_expand: false,
                 x_align: Clutter.ActorAlign.FILL,
-                y_align: Clutter.ActorAlign.FILL,
+                y_align: Clutter.ActorAlign.CENTER,
                 style_class: 'panel-calc-rpn-registerValueLabel'
             });
             register.set_style(`font-family: ${this._fontFamily}`);
@@ -216,173 +222,179 @@ const Indicator = GObject.registerClass(
             });
 
             let keyMatrix = [
-                [
-                    {
-                        buttonId: Processor.Processor.Key.F,
-                        label: _("F"),
-                        labelF: "",
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-yellowButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.K,
-                        label: _("K"),
-                        labelF: "",
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-blueButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.RESERVED_NULL,
-                    }
-                ],
-                [
-                    {
-                        buttonId: Processor.Processor.Key.SEVEN,
-                        label: _("7"),
-                        labelF: _("sin"),
-                        labelK: _("[x]"),
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.EIGHT,
-                        label: _("8"),
-                        labelF: _("cos"),
-                        labelK: _("{x}"),
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.NINE,
-                        label: _("9"),
-                        labelF: _("tg"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.MINUS,
-                        label: _("-"),
-                        labelF: _("\u{221A}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.DIVIDE,
-                        label: _("\u{00F7}"),
-                        labelF: _("1/x"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    }
-                ],
-                [
-                    {
-                        buttonId: Processor.Processor.Key.FOUR,
-                        label: _("4"),
-                        labelF: _("sin\u{207B}\u{00B9}"),
-                        labelK: _("|x|"),
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.FIVE,
-                        label: _("5"),
-                        labelF: _("cos\u{207B}\u{00B9}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.SIX,
-                        label: _("6"),
-                        labelF: _("tg\u{207B}\u{00B9}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.PLUS,
-                        label: _("+"),
-                        labelF: _("\u{03C0}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.MULTIPLY,
-                        label: _("\u{00D7}"),
-                        labelF: _("x\u{00B2}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    }
-                ],
-                [
-                    {
-                        buttonId: Processor.Processor.Key.ONE,
-                        label: _("1"),
-                        labelF: _("e\u{02E3}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.TWO,
-                        label: _("2"),
-                        labelF: _("lg"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.THREE,
-                        label: _("3"),
-                        labelF: _("ln"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.SWAP,
-                        label: _("\u{27F7}"),
-                        labelF: _("x\u{02b8}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.PUSH,
-                        label: _("E\u{2191}"),
-                        labelF: _("Bx"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    }
-                ],
-                [
-                    {
-                        buttonId: Processor.Processor.Key.ZERO,
-                        label: _("0"),
-                        labelF: _("10\u{02E3}"),
-                        labelK: _("NOP"),
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.PERIOD,
-                        label: _("."),
-                        labelF: _("\u{2941}"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.SIGN,
-                        label: _("/-/"),
-                        labelF: "",
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.ENTER_E,
-                        label: _("EE"),
-                        labelF: "",
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-grayButton'
-                    },
-                    {
-                        buttonId: Processor.Processor.Key.CLEAR_X,
-                        label: _("Cx"),
-                        labelF: _("CF"),
-                        labelK: "",
-                        style_class: 'panel-calc-rpn-redButton'
-                    }
-                ]
+                {
+                    keys: [
+                        {
+                            buttonId: Processor.Processor.Key.F,
+                            label: _("F"),
+                            labelF: "",
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-yellowButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.K,
+                            label: _("K"),
+                            labelF: "",
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-blueButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.RESERVED_NULL,
+                        }
+                    ], labels: false
+                }, {
+                    keys: [
+                        {
+                            buttonId: Processor.Processor.Key.SEVEN,
+                            label: _("7"),
+                            labelF: _("sin"),
+                            labelK: _("[x]"),
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.EIGHT,
+                            label: _("8"),
+                            labelF: _("cos"),
+                            labelK: _("{x}"),
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.NINE,
+                            label: _("9"),
+                            labelF: _("tg"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.MINUS,
+                            label: _("-"),
+                            labelF: _("\u{221A}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.DIVIDE,
+                            label: _("\u{00F7}"),
+                            labelF: _("1/x"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        }
+                    ], labels: true
+                }, {
+                    keys: [
+                        {
+                            buttonId: Processor.Processor.Key.FOUR,
+                            label: _("4"),
+                            labelF: _("sin\u{207B}\u{00B9}"),
+                            labelK: _("|x|"),
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.FIVE,
+                            label: _("5"),
+                            labelF: _("cos\u{207B}\u{00B9}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.SIX,
+                            label: _("6"),
+                            labelF: _("tg\u{207B}\u{00B9}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.PLUS,
+                            label: _("+"),
+                            labelF: _("\u{03C0}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.MULTIPLY,
+                            label: _("\u{00D7}"),
+                            labelF: _("x\u{00B2}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        }
+                    ], labels: true
+                }, {
+                    keys: [
+                        {
+                            buttonId: Processor.Processor.Key.ONE,
+                            label: _("1"),
+                            labelF: _("e\u{02E3}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.TWO,
+                            label: _("2"),
+                            labelF: _("lg"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.THREE,
+                            label: _("3"),
+                            labelF: _("ln"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.SWAP,
+                            label: _("\u{27F7}"),
+                            labelF: _("x\u{02b8}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.PUSH,
+                            label: _("E\u{2191}"),
+                            labelF: _("Bx"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        }
+                    ], labels: true
+                }, {
+                    keys: [
+                        {
+                            buttonId: Processor.Processor.Key.ZERO,
+                            label: _("0"),
+                            labelF: _("10\u{02E3}"),
+                            labelK: _("NOP"),
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.PERIOD,
+                            label: _("."),
+                            labelF: _("\u{2941}"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.SIGN,
+                            label: _("/-/"),
+                            labelF: "",
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.ENTER_E,
+                            label: _("EE"),
+                            labelF: "",
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-grayButton'
+                        },
+                        {
+                            buttonId: Processor.Processor.Key.CLEAR_X,
+                            label: _("Cx"),
+                            labelF: _("CF"),
+                            labelK: "",
+                            style_class: 'panel-calc-rpn-redButton'
+                        }
+                    ], labels: true
+                }
             ];
 
             keyMatrix.forEach(row => {
@@ -392,7 +404,7 @@ const Indicator = GObject.registerClass(
                     y_align: Clutter.ActorAlign.CENTER,
                     style_class: 'panel-calc-rpn-BoxLayout'
                 });
-                row.forEach(key => {
+                row.keys.forEach(key => {
                     if (key.buttonId != Processor.Processor.Key.RESERVED_NULL) {
                         let keyButton = new Key({
                             label: key.label,
@@ -404,7 +416,64 @@ const Indicator = GObject.registerClass(
                         keyButton.buttonId = key.buttonId;
                         keyButton.set_style(`font-family: ${this._fontFamily}`);
                         keyButton.connect('clicked', this._onKeyboardDispatcher.bind(this));
-                        lineKeyboardBox.add_actor(keyButton);
+
+                        if (row.labels == true) {
+                            let placeholderBox = new St.BoxLayout({
+                                vertical: true,
+                                x_expand: true,
+                                y_expand: true,
+                                x_align: Clutter.ActorAlign.START,
+                                y_align: Clutter.ActorAlign.END,
+                                style_class: 'panel-calc-rpn-BoxLayout'
+                            });
+                            let labelBox = new St.BoxLayout({
+                                vertical: false,
+                                x_expand: true,
+                                y_expand: true,
+                                x_align: Clutter.ActorAlign.FILL,
+                                y_align: Clutter.ActorAlign.FILL,
+                                style_class: 'panel-calc-rpn-BoxLayout'
+                            });
+                            if (key.labelF != "") {
+                                let labelFBox = new St.BoxLayout({
+                                    vertical: false,
+                                    x_expand: true,
+                                    y_expand: true,
+                                    x_align: Clutter.ActorAlign.CENTER,
+                                    y_align: Clutter.ActorAlign.FILL,
+                                    style_class: 'panel-calc-rpn-BoxLayout'
+                                }); 
+                                labelFBox.add_actor(new St.Label({
+                                    text: key.labelF,
+                                    x_align: Clutter.ActorAlign.CENTER,
+                                    y_align: Clutter.ActorAlign.CENTER,
+                                    style_class: 'panel-calc-rpn-labelFLabel'
+                                }));
+                                labelBox.add_actor(labelFBox); 
+                            }
+                            if (key.labelK != "") {
+                                let labelKBox = new St.BoxLayout({
+                                    vertical: false,
+                                    x_expand: true,
+                                    y_expand: true,
+                                    x_align: Clutter.ActorAlign.CENTER,
+                                    y_align: Clutter.ActorAlign.FILL,
+                                    style_class: 'panel-calc-rpn-BoxLayout'
+                                }); 
+                                labelKBox.add_actor(new St.Label({
+                                    text: key.labelK,
+                                    x_align: Clutter.ActorAlign.CENTER,
+                                    y_align: Clutter.ActorAlign.CENTER,
+                                    style_class: 'panel-calc-rpn-labelKLabel'
+                                }));
+                                labelBox.add_actor(labelKBox); 
+                            }
+                            placeholderBox.add_actor(labelBox);
+                            placeholderBox.add_actor(keyButton);
+                            lineKeyboardBox.add_actor(placeholderBox);
+                        } else {
+                            lineKeyboardBox.add_actor(keyButton);
+                        }
                     } else {
                         let controlBox = new St.BoxLayout({
                             vertical: false,
@@ -414,7 +483,7 @@ const Indicator = GObject.registerClass(
                             style_class: 'panel-calc-rpn-controlBoxLayout'
                         });
                         let settingsButton = new St.Button({
-                            //                            can_focus: true, 
+                            can_focus: true,
                             reactive: true,
                             track_hover: true,
                             icon_name: 'org.gnome.Settings-symbolic',
@@ -423,7 +492,7 @@ const Indicator = GObject.registerClass(
                             y_align: Clutter.ActorAlign.CENTER
                         });
                         let helpButton = new St.Button({
-                            //                            can_focus: true, 
+                            can_focus: true,
                             reactive: true,
                             track_hover: true,
                             icon_name: 'help-about-symbolic',
@@ -433,7 +502,7 @@ const Indicator = GObject.registerClass(
                         });
                         settingsButton.connect('clicked', this._onSettingsButtonClicked.bind(this));
                         helpButton.connect('clicked', this._onHelpButtonClicked.bind(this));
-                        
+
                         controlBox.add_actor(new St.BoxLayout({
                             vertical: false,
                             x_expand: true,
