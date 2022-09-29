@@ -49,6 +49,62 @@
     padding-top: 0.5em;
 }
 
+.panel-calc-rpn-indicatorModeNLabel {
+    color: white;
+    background-color: grey;
+    width: 1.1em;
+    padding: 0.1em 0.3em;
+    margin-left: 0.2em;
+    border-radius: 0.3em;
+    border-width: 0.05em;
+    border-color: gainsboro;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.panel-calc-rpn-indicatorModeFLabel {
+    color: dimgrey;
+    background-color: yellow;
+    width: 1.1em;
+    padding: 0.1em 0.3em;
+    margin-left: 0.2em;
+    border-radius: 0.3em;
+    border-width: 0.05em;
+    border-color: gainsboro;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.panel-calc-rpn-indicatorModeKLabel {
+    color: dimgrey;
+    background-color: steelblue;
+    width: 1.1em;
+    padding: 0.1em 0.3em;
+    margin-left: 0.2em;
+    border-radius: 0.3em;
+    border-width: 0.05em;
+    border-color: gainsboro;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.panel-calc-rpn-indicatorModeELabel {
+    color: dimgrey;
+    background-color: crimson;
+    width: 1.1em;
+    padding: 0.1em 0.3em;
+    margin-left: 0.2em;
+    border-radius: 0.3em;
+    border-width: 0.05em;
+    border-color: gainsboro;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
 .panel-calc-rpn-indicatorLabel {
     color: white;
     background-color: gray;
@@ -160,7 +216,7 @@
 
 .panel-calc-rpn-controlButton {
     color: grey;
-    height: 1.5em; 
+    height: 1.5em;
     width: 1.5em;
     margin-left: 0.5em;
     margin-right: 0.5em;

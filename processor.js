@@ -62,16 +62,6 @@ var Processor = class Processor {
         MAX_E_VALUE: 99
     }
 
-    static Indicator = {
-        INDICATOR: 0,
-        INDICATOR_E: 1,
-        REGISTER_X: 2,
-        REGISTER_Y: 3,
-        REGISTER_Z: 4,
-        REGISTER_T: 5,
-        REGISTER_X1: 6
-    }
-
     static Key = {
         ZERO: 0,
         ONE: 1,
@@ -104,17 +94,35 @@ var Processor = class Processor {
         RESERVED_NULL: 9999
     };
 
+    static Indicator = {
+        INDICATOR: 0,
+        INDICATOR_E: 1,
+        REGISTER_X: 2,
+        REGISTER_Y: 3,
+        REGISTER_Z: 4,
+        REGISTER_T: 5,
+        REGISTER_X1: 6,
+        INDICATOR_MODE: 7
+    };
+
+    static Mode = {
+        NORMAL_MODE: 0,
+        EE_MODE: 1,
+        F_MODE: 2,
+        K_MODE: 3,
+        E_MODE: 4
+    };
+
     _clear() {
         this._mantissaSign = false;
         this._mantissa = [];
         this._fraction = 0;
         this._real = false;
 
-        this._e = false;
         this._exponentSign = false;
         this._exponent = [0, 0];
 
-        this._error = false;
+        this._mode = Processor.Mode.NORMAL_MODE;
     }
 
     _isReal() {
@@ -122,11 +130,11 @@ var Processor = class Processor {
     }
 
     _isE() {
-        return (this._e == true);
+        return (this._mode == Processor.Mode.EE_MODE);
     }
 
     _isError() {
-        return (this._error == true);
+        return (this._mode == Processor.Mode.E_MODE);
     }
 
     _toDecimal() {
@@ -289,7 +297,7 @@ var Processor = class Processor {
         this._z = this._t;
     }
 
-    setE() {
+    __setE() {
         if (this._mantissa.length == 0) {
             this._mantissa.push(1);
             this._mantissa._fraction = 1;
@@ -297,7 +305,7 @@ var Processor = class Processor {
         this._e = true;
     }
 
-    point() {
+    __point() {
         if (this._isE()) {
             this._error = true;
         } else {
@@ -305,7 +313,7 @@ var Processor = class Processor {
         }
     }
 
-    digit(value) {
+    __digit(value) {
         if (!this._isE()) {
             if (this._mantissa.length < Processor.Precision.MAX) {
                 this._mantissa.push(value);
@@ -323,7 +331,7 @@ var Processor = class Processor {
         }
     }
 
-    negate() {
+    __negate() {
         if (this._isE()) {
         } else {
             this._x.negate();
@@ -332,19 +340,19 @@ var Processor = class Processor {
         }
     }
 
-    clearX() {
+    __clearX() {
         this._x = Decimal.Decimal(0);
         this._clear();
         this._updateIndicatorsAfterOp();
     }
 
-    push() {
+    __push() {
         this._push();
         this._updateIndicatorsAfterOp();
         this._clear();
     }
 
-    swap() {
+    __swap() {
         this._pushX();
         this._r = this._y;
         this._y = this._x;
@@ -353,14 +361,14 @@ var Processor = class Processor {
         this._clear();
     }
 
-    backX() {
+    __backX() {
         this._push();
         this._popX();
         this._updateIndicatorsAfterOp();
         this._clear();
     }
 
-    add() {
+    __add() {
         this._pushX();
         this._r = this._y.plus(this._x);
         this._pop();
@@ -369,7 +377,7 @@ var Processor = class Processor {
         this._clear();
     }
 
-    subtract() {
+    __subtract() {
         this._pushX();
         this._r = this._y.minus(this._x);
         this._pop();
@@ -378,13 +386,101 @@ var Processor = class Processor {
         this._clear();
     }
 
-    multiply() {
+    __multiply() {
         this._pushX();
         this._r = this._y.times(this._x);
         this._pop();
         this._x = this._r;
         this._updateIndicatorsAfterOp();
         this._clear();
+    }
+
+    keyPressed (key) {
+        switch (key) {
+            case Processor.Key.ZERO:
+                this.__digit(0);
+                break;
+
+            case Processor.Key.ONE:
+                this.__digit(1);
+                break;
+
+            case Processor.Key.TWO:
+                this.__digit(2);
+                break;
+
+            case Processor.Key.THREE:
+                this.__digit(3);
+                break;
+
+            case Processor.Key.FOUR:
+                this.__digit(4);
+                break;
+
+            case Processor.Key.FIVE:
+                this.__digit(5);
+                break;
+
+            case Processor.Key.SIX:
+                this.__digit(6);
+                break;
+
+            case Processor.Key.SEVEN:
+                this.__digit(7);
+                break;
+
+            case Processor.Key.EIGHT:
+                this.__digit(8);
+                break;
+
+            case Processor.Key.NINE:
+                this.__digit(9);
+                break;
+
+            case Processor.Key.PERIOD:
+                this.__point();
+                break;
+
+            case Processor.Key.PLUS:
+                this.__add();
+                break;
+
+            case Processor.Key.MINUS:
+                this.__subtract();
+                break;
+
+            case Processor.Key.MULTIPLY:
+                this.__multiply();
+                break;
+
+            case Processor.Key.DIVIDE:
+
+                break;
+
+            case Processor.Key.SIGN:
+                this.__negate();
+                break;
+
+            case Processor.Key.PUSH:
+                this.__push();
+                break;
+
+            case Processor.Key.SWAP:
+                this.__swap();
+                break;
+
+            case Processor.Key.BACK_X:
+                this.__backX();
+                break;
+
+            case Processor.Key.CLEAR_X:
+                this.__clearX();
+                break;
+
+            default:
+                return;
+        }
+
     }
 
 };

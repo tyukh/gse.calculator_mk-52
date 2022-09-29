@@ -116,6 +116,66 @@ const Indicator = GObject.registerClass(
             this._processor.init();
         }
 
+        static Glyph = {
+            NONE: "",
+            
+            MODE_EE: _("EE"),
+            MODE_F: "F",
+            MODE_K: "K",
+            MODE_E: _("E"),
+
+            ZERO: "0",
+            ONE: "1", 
+            TWO: "2", 
+            THREE: "3", 
+            FOUR: "4", 
+            FIVE: "5", 
+            SIX: "6", 
+            SEVEN: "7", 
+            EIGHT: "8", 
+            NINE: "9",
+            PI: "\u{03C0}",
+            POINT: ".",
+            SIGN: "/-/",
+            
+            OP_ENTER_EXPONENT: _("EE"),
+
+            OP_CLEAR_X: _("Cx"),
+            OP_CLEAR_F: _("CF"),
+            OP_NOP: _("NOP"),
+
+            OP_PUSH_X: _("E\u{2191}"),
+            OP_BACK_X: _("Bx"),
+            OP_SWAP: "\u{27F7}",
+            OP_CIRCLE: "\u{2941}",
+
+            OP_ADD: "+",
+            OP_SUBTRACT: "-",
+            OP_MULTIPLY: "\u{00D7}",
+            OP_DIVIDE: "\u{00F7}",
+            OP_1_DIV_X: "1/x",
+
+            OP_SINE: "sin",
+            OP_COSINE: "cos",
+            OP_TANGENT: "tg",
+            OP_ARCSINE: "sin\u{207B}\u{00B9}",
+            OP_ARCCOSINE: "cos\u{207B}\u{00B9}",
+            OP_ARCTANGENT: "tg\u{207B}\u{00B9}",
+
+            OP_X_SQ: "x\u{00B2}",
+            OP_SQRT: "\u{221A}",
+            OP_TEN_POW_X: "10\u{02E3}",
+            OP_X_POW_Y: "x\u{02b8}",
+
+            OP_E_POW_X: "e\u{02E3}",
+            OP_LG: "lg",
+            OP_LN: "ln",
+
+            OP_INTEGER: "[x]",
+            OP_DECIMAL: "{x}",
+            OP_ABSOLUTE: "|x|",
+        };
+
         _initRegister(stackBox, name) {
             let box = new St.BoxLayout({
                 vertical: false,
@@ -186,6 +246,7 @@ const Indicator = GObject.registerClass(
                 vertical: false,
                 x_expand: true,
                 y_expand: true,
+                x_align: Clutter.ActorAlign.FILL,
                 y_align: Clutter.ActorAlign.CENTER,
                 style_class: 'panel-calc-rpn-indicatorBoxLayout'
             });
@@ -209,6 +270,15 @@ const Indicator = GObject.registerClass(
             indicatorBox.add_actor(this._indicator);
             indicatorBox.add_actor(this._indicatorE);
 
+            this._indicatorModeLabel = new St.Label({
+                text: "",
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.FILL,
+                style_class: 'panel-calc-rpn-indicatorModeNLabel'
+            });
+            this._indicatorModeLabel.set_style(`font-family: ${this._fontFamily}`);
+            indicatorBox.add_actor(this._indicatorModeLabel);
+
             indicatorArea.actor.add_child(indicatorBox);
         }
 
@@ -226,16 +296,16 @@ const Indicator = GObject.registerClass(
                     keys: [
                         {
                             buttonId: Processor.Processor.Key.F,
-                            label: _("F"),
-                            labelF: "",
-                            labelK: "",
+                            label: Indicator.Glyph.MODE_F,
+                            labelF: Indicator.Glyph.NONE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-yellowButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.K,
-                            label: _("K"),
-                            labelF: "",
-                            labelK: "",
+                            label: Indicator.Glyph.MODE_K,
+                            labelF: Indicator.Glyph.NONE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-blueButton'
                         },
                         {
@@ -246,37 +316,37 @@ const Indicator = GObject.registerClass(
                     keys: [
                         {
                             buttonId: Processor.Processor.Key.SEVEN,
-                            label: _("7"),
-                            labelF: _("sin"),
-                            labelK: _("[x]"),
+                            label: Indicator.Glyph.SEVEN,
+                            labelF: Indicator.Glyph.OP_SINE,
+                            labelK: Indicator.Glyph.OP_INTEGER,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.EIGHT,
-                            label: _("8"),
-                            labelF: _("cos"),
-                            labelK: _("{x}"),
+                            label: Indicator.Glyph.EIGHT,
+                            labelF: Indicator.Glyph.OP_COSINE,
+                            labelK: Indicator.Glyph.OP_DECIMAL,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.NINE,
-                            label: _("9"),
-                            labelF: _("tg"),
-                            labelK: "",
+                            label: Indicator.Glyph.NINE,
+                            labelF: Indicator.Glyph.OP_TANGENT,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.MINUS,
-                            label: _("-"),
-                            labelF: _("\u{221A}"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_SUBTRACT,
+                            labelF: Indicator.Glyph.OP_SQRT,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.DIVIDE,
-                            label: _("\u{00F7}"),
-                            labelF: _("1/x"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_DIVIDE,
+                            labelF: Indicator.Glyph.OP_1_DIV_X,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         }
                     ], labels: true
@@ -284,37 +354,37 @@ const Indicator = GObject.registerClass(
                     keys: [
                         {
                             buttonId: Processor.Processor.Key.FOUR,
-                            label: _("4"),
-                            labelF: _("sin\u{207B}\u{00B9}"),
-                            labelK: _("|x|"),
+                            label: Indicator.Glyph.FOUR,
+                            labelF: Indicator.Glyph.OP_ARCSINE,
+                            labelK: Indicator.Glyph.OP_ABSOLUTE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.FIVE,
-                            label: _("5"),
-                            labelF: _("cos\u{207B}\u{00B9}"),
-                            labelK: "",
+                            label: Indicator.Glyph.FIVE,
+                            labelF: Indicator.Glyph.OP_ARCCOSINE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.SIX,
-                            label: _("6"),
-                            labelF: _("tg\u{207B}\u{00B9}"),
-                            labelK: "",
+                            label: Indicator.Glyph.SIX,
+                            labelF: Indicator.Glyph.OP_ARCTANGENT,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.PLUS,
-                            label: _("+"),
-                            labelF: _("\u{03C0}"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_ADD,
+                            labelF: Indicator.Glyph.PI,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.MULTIPLY,
-                            label: _("\u{00D7}"),
-                            labelF: _("x\u{00B2}"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_MULTIPLY,
+                            labelF: Indicator.Glyph.OP_X_SQ,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         }
                     ], labels: true
@@ -322,37 +392,37 @@ const Indicator = GObject.registerClass(
                     keys: [
                         {
                             buttonId: Processor.Processor.Key.ONE,
-                            label: _("1"),
-                            labelF: _("e\u{02E3}"),
-                            labelK: "",
+                            label: Indicator.Glyph.ONE,
+                            labelF: Indicator.Glyph.OP_E_POW_X,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.TWO,
-                            label: _("2"),
-                            labelF: _("lg"),
-                            labelK: "",
+                            label: Indicator.Glyph.TWO,
+                            labelF: Indicator.Glyph.OP_LG,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.THREE,
-                            label: _("3"),
-                            labelF: _("ln"),
-                            labelK: "",
+                            label: Indicator.Glyph.THREE,
+                            labelF: Indicator.Glyph.OP_LN,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.SWAP,
-                            label: _("\u{27F7}"),
-                            labelF: _("x\u{02b8}"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_SWAP,
+                            labelF: Indicator.Glyph.OP_X_POW_Y,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.PUSH,
-                            label: _("E\u{2191}"),
-                            labelF: _("Bx"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_PUSH_X,
+                            labelF: Indicator.Glyph.OP_BACK_X,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         }
                     ], labels: true
@@ -360,37 +430,37 @@ const Indicator = GObject.registerClass(
                     keys: [
                         {
                             buttonId: Processor.Processor.Key.ZERO,
-                            label: _("0"),
-                            labelF: _("10\u{02E3}"),
-                            labelK: _("NOP"),
+                            label: Indicator.Glyph.ZERO,
+                            labelF: Indicator.Glyph.OP_TEN_POW_X,
+                            labelK: Indicator.Glyph.OP_NOP,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.PERIOD,
-                            label: _("."),
-                            labelF: _("\u{2941}"),
-                            labelK: "",
+                            label: Indicator.Glyph.POINT,
+                            labelF: Indicator.Glyph.OP_CIRCLE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.SIGN,
-                            label: _("/-/"),
-                            labelF: "",
-                            labelK: "",
+                            label: Indicator.Glyph.SIGN,
+                            labelF: Indicator.Glyph.NONE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.ENTER_E,
-                            label: _("EE"),
-                            labelF: "",
-                            labelK: "",
+                            label: Indicator.Glyph.OP_ENTER_EXPONENT,
+                            labelF: Indicator.Glyph.NONE,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-grayButton'
                         },
                         {
                             buttonId: Processor.Processor.Key.CLEAR_X,
-                            label: _("Cx"),
-                            labelF: _("CF"),
-                            labelK: "",
+                            label: Indicator.Glyph.OP_CLEAR_X,
+                            labelF: Indicator.Glyph.OP_CLEAR_F,
+                            labelK: Indicator.Glyph.NONE,
                             style_class: 'panel-calc-rpn-redButton'
                         }
                     ], labels: true
@@ -442,14 +512,14 @@ const Indicator = GObject.registerClass(
                                     x_align: Clutter.ActorAlign.CENTER,
                                     y_align: Clutter.ActorAlign.FILL,
                                     style_class: 'panel-calc-rpn-BoxLayout'
-                                }); 
+                                });
                                 labelFBox.add_actor(new St.Label({
                                     text: key.labelF,
                                     x_align: Clutter.ActorAlign.CENTER,
                                     y_align: Clutter.ActorAlign.CENTER,
                                     style_class: 'panel-calc-rpn-labelFLabel'
                                 }));
-                                labelBox.add_actor(labelFBox); 
+                                labelBox.add_actor(labelFBox);
                             }
                             if (key.labelK != "") {
                                 let labelKBox = new St.BoxLayout({
@@ -459,14 +529,14 @@ const Indicator = GObject.registerClass(
                                     x_align: Clutter.ActorAlign.CENTER,
                                     y_align: Clutter.ActorAlign.FILL,
                                     style_class: 'panel-calc-rpn-BoxLayout'
-                                }); 
+                                });
                                 labelKBox.add_actor(new St.Label({
                                     text: key.labelK,
                                     x_align: Clutter.ActorAlign.CENTER,
                                     y_align: Clutter.ActorAlign.CENTER,
                                     style_class: 'panel-calc-rpn-labelKLabel'
                                 }));
-                                labelBox.add_actor(labelKBox); 
+                                labelBox.add_actor(labelKBox);
                             }
                             placeholderBox.add_actor(labelBox);
                             placeholderBox.add_actor(keyButton);
@@ -506,7 +576,7 @@ const Indicator = GObject.registerClass(
                         controlBox.add_actor(new St.BoxLayout({
                             vertical: false,
                             x_expand: true,
-                            x_align: Clutter.ActorAlign.FILL,
+                            x_align: Clutter.ActorAlign.CENTER,
                             y_align: Clutter.ActorAlign.FILL
                         }));
                         controlBox.add_actor(settingsButton);
@@ -518,93 +588,6 @@ const Indicator = GObject.registerClass(
             })
 
             keyboardArea.actor.add_child(keyboardBox);
-        }
-
-        _processorExecute(action) {
-            switch (action) {
-                case Processor.Processor.Key.ZERO:
-                    this._processor.digit(0);
-                    break;
-
-                case Processor.Processor.Key.ONE:
-                    this._processor.digit(1);
-                    break;
-
-                case Processor.Processor.Key.TWO:
-                    this._processor.digit(2);
-                    break;
-
-                case Processor.Processor.Key.THREE:
-                    this._processor.digit(3);
-                    break;
-
-                case Processor.Processor.Key.FOUR:
-                    this._processor.digit(4);
-                    break;
-
-                case Processor.Processor.Key.FIVE:
-                    this._processor.digit(5);
-                    break;
-
-                case Processor.Processor.Key.SIX:
-                    this._processor.digit(6);
-                    break;
-
-                case Processor.Processor.Key.SEVEN:
-                    this._processor.digit(7);
-                    break;
-
-                case Processor.Processor.Key.EIGHT:
-                    this._processor.digit(8);
-                    break;
-
-                case Processor.Processor.Key.NINE:
-                    this._processor.digit(9);
-                    break;
-
-                case Processor.Processor.Key.PERIOD:
-                    this._processor.point();
-                    break;
-
-                case Processor.Processor.Key.PLUS:
-                    this._processor.add();
-                    break;
-
-                case Processor.Processor.Key.MINUS:
-                    this._processor.subtract();
-                    break;
-
-                case Processor.Processor.Key.MULTIPLY:
-                    this._processor.multiply();
-                    break;
-
-                case Processor.Processor.Key.DIVIDE:
-
-                    break;
-
-                case Processor.Processor.Key.SIGN:
-                    this._processor.negate();
-                    break;
-
-                case Processor.Processor.Key.PUSH:
-                    this._processor.push();
-                    break;
-
-                case Processor.Processor.Key.SWAP:
-                    this._processor.swap();
-                    break;
-
-                case Processor.Processor.Key.BACK_X:
-                    this._processor.backX();
-                    break;
-
-                case Processor.Processor.Key.CLEAR_X:
-                    this._processor.clearX();
-                    break;
-
-                default:
-                    return;
-            }
         }
 
         _onIndicatorSet(indicator, value) {
@@ -637,13 +620,45 @@ const Indicator = GObject.registerClass(
                     this._x1Register.set_text(value);
                     break;
 
+                case Processor.Processor.Indicator.INDICATOR_MODE:
+                    switch (value) {
+                        case Processor.Processor.Mode.NORMAL_MODE:
+                            this._indicatorModeLabel.set_text(Indicator.Glyph.NONE);
+                            this._indicatorModeLabel.set_style('panel-calc-rpn-indicatorModeNLabel');
+                            break;
+
+                        case Processor.Processor.Mode.EE_MODE:
+                            this._indicatorModeLabel.set_text(Indicator.Glyph.MODE_EE);
+                            this._indicatorModeLabel.set_style('panel-calc-rpn-indicatorModeNLabel');
+                            break;
+
+                        case Processor.Processor.Mode.F_MODE:
+                            this._indicatorModeLabel.set_text(Indicator.Glyph.MODE_F);
+                            this._indicatorModeLabel.set_style('panel-calc-rpn-indicatorModeFLabel');
+                            break;
+
+                        case Processor.Processor.Mode.K_MODE:
+                            this._indicatorModeLabel.set_text(Indicator.Glyph.MODE_K);
+                            this._indicatorModeLabel.set_style('panel-calc-rpn-indicatorModeKLabel');
+                            break;
+
+                        case Processor.Processor.Mode.E_MODE:
+                            this._indicatorModeLabel.set_text(Indicator.Glyph.MODE_E);
+                            this._indicatorModeLabel.set_style('panel-calc-rpn-indicatorModeELabel');
+                            break;
+
+                        default:
+                            break;
+                    }
+                    break;
+
                 default:
                     return;
             }
         }
 
         _onKeyboardDispatcher(button) {
-            this._processorExecute(button.buttonId);
+            this._processor.keyPressed(button.buttonId);
         }
 
         _onKeyboardKeyEvent(actor, event) {
@@ -664,15 +679,15 @@ const Indicator = GObject.registerClass(
             if ((event.get_state() & Clutter.ModifierType.MOD1_MASK) != 0) {
                 switch (symbol) {
                     case Clutter.KEY_KP_Subtract:
-                        this._processorExecute(Processor.Processor.Key.SIGN);
+                        this._processor.keyPressed(Processor.Processor.Key.SIGN);
                         break;
 
                     case Clutter.KEY_KP_Enter:
-                        this._processorExecute(Processor.Processor.Key.SWAP);
+                        this._processor.keyPressed(Processor.Processor.Key.SWAP);
                         break;
 
                     case Clutter.KEY_BackSpace:
-                        this._processorExecute(Processor.Processor.Key.BACK_X);
+                        this._processor.keyPressed(Processor.Processor.Key.BACK_X);
                         break;
 
                     default:
@@ -682,81 +697,81 @@ const Indicator = GObject.registerClass(
                 switch (symbol) {
                     case Clutter.KEY_KP_0:
                     case Clutter.KEY_KP_Insert:
-                        this._processorExecute(Processor.Processor.Key.ZERO);
+                        this._processor.keyPressed(Processor.Processor.Key.ZERO);
                         break;
 
                     case Clutter.KEY_KP_1:
                     case Clutter.KEY_KP_End:
-                        this._processorExecute(Processor.Processor.Key.ONE);
+                        this._processor.keyPressed(Processor.Processor.Key.ONE);
                         break;
 
                     case Clutter.KEY_KP_2:
                     case Clutter.KEY_KP_Down:
-                        this._processorExecute(Processor.Processor.Key.TWO);
+                        this._processor.keyPressed(Processor.Processor.Key.TWO);
                         break;
 
                     case Clutter.KEY_KP_3:
                     case Clutter.KEY_KP_Page_Down:
-                        this._processorExecute(Processor.Processor.Key.THREE);
+                        this._processor.keyPressed(Processor.Processor.Key.THREE);
                         break;
 
                     case Clutter.KEY_KP_4:
                     case Clutter.KEY_KP_Left:
-                        this._processorExecute(Processor.Processor.Key.FOUR);
+                        this._processor.keyPressed(Processor.Processor.Key.FOUR);
                         break;
 
                     case Clutter.KEY_KP_5:
                     case Clutter.KEY_KP_Begin:
-                        this._processorExecute(Processor.Processor.Key.FIVE);
+                        this._processor.keyPressed(Processor.Processor.Key.FIVE);
                         break;
 
                     case Clutter.KEY_KP_6:
                     case Clutter.KEY_KP_Right:
-                        this._processorExecute(Processor.Processor.Key.SIX);
+                        this._processor.keyPressed(Processor.Processor.Key.SIX);
                         break;
 
                     case Clutter.KEY_KP_7:
                     case Clutter.KEY_KP_Home:
-                        this._processorExecute(Processor.Processor.Key.SEVEN);
+                        this._processor.keyPressed(Processor.Processor.Key.SEVEN);
                         break;
 
                     case Clutter.KEY_KP_8:
                     case Clutter.KEY_KP_Up:
-                        this._processorExecute(Processor.Processor.Key.EIGHT);
+                        this._processor.keyPressed(Processor.Processor.Key.EIGHT);
                         break;
 
                     case Clutter.KEY_KP_9:
                     case Clutter.KEY_KP_Page_Up:
-                        this._processorExecute(Processor.Processor.Key.NINE);
+                        this._processor.keyPressed(Processor.Processor.Key.NINE);
                         break;
 
                     case Clutter.KEY_KP_Decimal:
                     case Clutter.KEY_KP_Delete:
-                        this._processorExecute(Processor.Processor.Key.PERIOD);
+                        this._processor.keyPressed(Processor.Processor.Key.PERIOD);
                         break;
 
                     case Clutter.KEY_KP_Add:
-                        this._processorExecute(Processor.Processor.Key.PLUS);
+                        this._processor.keyPressed(Processor.Processor.Key.PLUS);
                         break;
 
                     case Clutter.KEY_KP_Subtract:
-                        this._processorExecute(Processor.Processor.Key.MINUS);
+                        this._processor.keyPressed(Processor.Processor.Key.MINUS);
                         break;
 
                     case Clutter.KEY_KP_Multiply:
-                        this._processorExecute(Processor.Processor.Key.MULTIPLY);
+                        this._processor.keyPressed(Processor.Processor.Key.MULTIPLY);
                         break;
 
                     case Clutter.KEY_KP_Divide:
-                        this._processorExecute(Processor.Processor.Key.DIVIDE);
+                        this._processor.keyPressed(Processor.Processor.Key.DIVIDE);
                         break;
 
                     case Clutter.KEY_KP_Enter:
-                        this._processorExecute(Processor.Processor.Key.PUSH);
+                        this._processor.keyPressed(Processor.Processor.Key.PUSH);
                         break;
 
                     case Clutter.KEY_BackSpace:
-                        this._processorExecute(Processor.Processor.Key.CLEAR_X);
+                        this._processor.keyPressed(Processor.Processor.Key.CLEAR_X);
                         break;
 
                     default:
