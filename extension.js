@@ -47,7 +47,7 @@ class Extension {
          * - `right` is the box where we want our button to be displayed (left/center/right)
          */
         // Main.panel.addToStatusArea(this._uuid, this._calculator);
-        Main.panel.addToStatusArea(this._uuid, this._calculator, 0, 'center');
+        Main.panel.addToStatusArea(this._uuid, this._calculator, this._calculator.iconPosition, this._calculator.iconPanel);
     }
 
     disable() {

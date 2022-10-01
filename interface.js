@@ -18,7 +18,7 @@
 
 'use strict';
 
-const { GObject, St, Clutter, Pango } = imports.gi;
+const { GObject, St, Clutter, Gio } = imports.gi;
 const Gettext = imports.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -67,10 +67,17 @@ var Calculator = GObject.registerClass(
         _init() {
             super._init(0.0, _(`${Me.metadata.name} Calculator`));
 
+            this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn');
+
+            this._iconPosition = this._settings.get_enum('icon-position');
+            this._iconPanel = this._settings.get_enum('icon-panel');
+            this._fontFamily = this._settings.get_string('font-family');
+
+            //this._settings.set_enum('icon-position', 0);
+            //this._settings.set_enum('icon-panel', 1);
+            //this._settings.set_string('font-family', 'JetBrains Mono');
+
             this._processor = new Processor.Processor();
-            this._fontFamily = "monospace";
-            //this._fontFamily = 'JetBrains Mono';
-            //this._fontFamily = 'Source Code Pro';
 
             this.add_child(new St.Icon({
                 icon_name: 'org.gnome.Calculator-symbolic',
@@ -801,6 +808,15 @@ var Calculator = GObject.registerClass(
         }
 
         _onHelpButtonClicked() {
+        }
+
+        get iconPosition() {
+            return this._iconPosition;
+        }
+
+        get iconPanel() {
+            let panel = ['left', 'center', 'right'];
+            return panel[this._iconPanel];
         }
     }
 );
