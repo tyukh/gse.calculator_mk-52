@@ -26,7 +26,6 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Decimal = Me.imports.decimal.decimal;
 
 var Processor = class Processor {
-
     constructor() {
         Decimal.Decimal.set({
             precision: Processor.Precision.MAX,
@@ -95,14 +94,14 @@ var Processor = class Processor {
     };
 
     static Indicator = {
-        INDICATOR: 0,
-        INDICATOR_E: 1,
+        MANTISSA: 0,
+        EXPONENT: 1,
         REGISTER_X: 2,
         REGISTER_Y: 3,
         REGISTER_Z: 4,
         REGISTER_T: 5,
         REGISTER_X1: 6,
-        INDICATOR_MODE: 7
+        MODE: 7
     };
 
     static Mode = {
@@ -261,20 +260,20 @@ var Processor = class Processor {
 
     _updateIndicatorsAfterMantissa() {
         this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.INDICATOR, this._toIndicator());
-        this._setIndicator(Processor.Indicator.INDICATOR_E, this._toIndicatorE());
+        this._setIndicator(Processor.Indicator.MANTISSA, this._toIndicator());
+        this._setIndicator(Processor.Indicator.EXPONENT, this._toIndicatorE());
     }
 
     _updateIndicatorsAfterExponent() {
         this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.INDICATOR, this._formatDecimalMantissa(this._x));
-        this._setIndicator(Processor.Indicator.INDICATOR_E, this._toIndicatorE());
+        this._setIndicator(Processor.Indicator.MANTISSA, this._formatDecimalMantissa(this._x));
+        this._setIndicator(Processor.Indicator.EXPONENT, this._toIndicatorE());
     }
 
     _updateIndicatorsAfterOp() {
         this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.INDICATOR, this._formatDecimalMantissa(this._x));
-        this._setIndicator(Processor.Indicator.INDICATOR_E, this._formatDecimalExponent(this._x));
+        this._setIndicator(Processor.Indicator.MANTISSA, this._formatDecimalMantissa(this._x));
+        this._setIndicator(Processor.Indicator.EXPONENT, this._formatDecimalExponent(this._x));
     }
 
     _pushX() {
@@ -480,7 +479,5 @@ var Processor = class Processor {
             default:
                 return;
         }
-
     }
-
 };
