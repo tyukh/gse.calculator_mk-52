@@ -4,7 +4,8 @@
         "ARCTG",
         "gettext",
         "ngettext",
-        "Pango"
+        "Pango",
+        "Prefs"
     ],
     "editor.fontFamily": "'JetBrains Mono', 'Source Code Pro', 'monospace', monospace"
 }

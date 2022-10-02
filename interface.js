@@ -69,6 +69,9 @@ var Calculator = GObject.registerClass(
 
             this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn');
 
+            //this._settings.connect('changed::font-family', this._onFontFamilyChanged.bind(this));
+            this._settings.connect('changed', this._onChangeSettings.bind(this));
+
             this._iconPosition = this._settings.get_enum('icon-position');
             this._iconPanel = this._settings.get_enum('icon-panel');
             this._fontFamily = this._settings.get_string('font-family');
@@ -805,9 +808,20 @@ var Calculator = GObject.registerClass(
         }
 
         _onSettingsButtonClicked() {
+            this.menu.toggle();
+            ExtensionUtils.openPrefs();
         }
 
         _onHelpButtonClicked() {
+        }
+
+        _onChangeSettings(object, key, data) {
+            Main.notify(object.name.toString(), key.toString());
+        }
+
+        _onFontFamilyChanged() {
+            this._fontFamily = this._settings.get_string('font-family');
+            Main.notify(Me.metadata.name + " " + _("Extension"), _("Font changed to ") + "\'" + this._fontFamily + "\'\n" + _("Please restart extension"));            
         }
 
         get iconPosition() {
