@@ -34,7 +34,7 @@ class Extension {
     constructor(uuid) {
         this._uuid = uuid;
 
-        ExtensionUtils.initTranslations(Me.metadata.uuid);
+        ExtensionUtils.initTranslations(); // Me.metadata.uuid
     }
 
     enable() {
