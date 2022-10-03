@@ -28,6 +28,7 @@ const Domain = Gettext.domain(Me.metadata.uuid);
 const _ = Domain.gettext;
 const ngettext = Domain.ngettext;
 
+const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Processor = Me.imports.processor;
@@ -67,9 +68,9 @@ var Calculator = GObject.registerClass(
         _init() {
             super._init(0.0, _(`${Me.metadata.name} Calculator`));
 
-            this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn');
+            this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn'); //use meta !!!
 
-            //this._settings.connect('changed::font-family', this._onFontFamilyChanged.bind(this));
+            this._settings.connect('changed::font-family', this._onFontFamilyChanged.bind(this));
             this._settings.connect('changed', this._onChangeSettings.bind(this));
 
             this._iconPosition = this._settings.get_enum('icon-position');
