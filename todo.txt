@@ -3,3 +3,4 @@ Class Extension extend GObject
 Transfer settings signal recivers into Extension
 Apply moving icon on panel
 Apply changing font (enable/disable)
+Extend icon with last result and add settings for that
