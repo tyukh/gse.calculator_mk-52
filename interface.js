@@ -66,9 +66,9 @@ const Key = GObject.registerClass({
 var Calculator = GObject.registerClass(
     class Calculator extends PanelMenu.Button {
         _init() {
-            super._init(0.0, _(`${Me.metadata.name} Calculator`));
+            super._init(0.0, _(`${Me.metadata.name} Indicator`));
 
-            this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn'); //use meta !!!
+            this._settings = ExtensionUtils.getSettings(); //'org.gnome.shell.extensions.gse.panel-calc-rpn'
 
             this._settings.connect('changed::font-family', this._onFontFamilyChanged.bind(this));
             this._settings.connect('changed', this._onChangeSettings.bind(this));
@@ -85,7 +85,7 @@ var Calculator = GObject.registerClass(
 
             this.add_child(new St.Icon({
                 icon_name: 'org.gnome.Calculator-symbolic',
-                style_class: 'system-status-icon',
+                style_class: 'system-status-icon'
             }));
 
             //-- Init controls

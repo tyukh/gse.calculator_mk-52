@@ -30,7 +30,7 @@ const PrefsWidget = GObject.registerClass({
     _init(params = {}) {
         super._init(params);
 
-        this._settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.gse.panel-calc-rpn');
+        this._settings = ExtensionUtils.getSettings(); // 'org.gnome.shell.extensions.gse.panel-calc-rpn'
 
         this._fontFamily.set_font(this._settings.get_string('font-family'));
         this._iconPanel.set_active_id(this._settings.get_enum('icon-panel').toString());
@@ -53,7 +53,7 @@ const PrefsWidget = GObject.registerClass({
 });
 
 function init() {
-    ExtensionUtils.initTranslations(Me.metadata.uuid);
+    ExtensionUtils.initTranslations(); // Me.metadata.uuid
 }
 
 function buildPrefsWidget() {

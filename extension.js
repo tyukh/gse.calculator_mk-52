@@ -18,6 +18,7 @@
 
 'use strict';
 
+const { GObject, Gio } = imports.gi;
 const Gettext = imports.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -30,12 +31,47 @@ const ngettext = Domain.ngettext;
 const Main = imports.ui.main;
 const Calculator = Me.imports.interface;
 
-class Extension {
-    constructor(uuid) {
-        this._uuid = uuid;
+const Extension = GObject.registerClass({
+    GTypeName: 'Extension',
+    Properties: {
+        'uuid': GObject.ParamSpec.string(
+            'uuid',
+            'uuid',
+            'A read-write string property',
+            GObject.ParamFlags.READWRITE,
+            ''
+        ),
+    }
+}, class Extension extends GObject.Object {
+    constructor(properties = {}) {
+        super(properties);
 
         ExtensionUtils.initTranslations(); // Me.metadata.uuid
     }
+
+    get uuid () {
+        // Implementing the default value manually
+        if (this._uuid === undefined)
+            this._uuid = null;
+
+        return this._uuid;
+    }
+
+    set uuid(value) {
+        // Skip emission if the value has not changed
+        if (this._uuid === value)
+            return;
+
+        // Set the property value before emitting
+        this._uuid = value;
+    }
+
+    /*class Extension {
+        constructor(uuid) {
+            this._uuid = uuid;
+    
+            ExtensionUtils.initTranslations(); // Me.metadata.uuid
+        }*/
 
     enable() {
         this._calculator = new Calculator.Calculator();
@@ -54,8 +90,11 @@ class Extension {
         this._calculator.destroy();
         this._calculator = null;
     }
-}
+});
 
 function init(meta) {
-    return new Extension(meta.uuid);
-}
+        return new Extension({
+            uuid: meta.uuid
+        });
+        //    return new Extension(meta.uuid);
+    }
