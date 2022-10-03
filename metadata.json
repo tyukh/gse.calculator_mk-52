@@ -8,4 +8,6 @@
   ],
   "url": "https://github.com/tyukh/gse.panel-calc-rpn-tyukh.github.io",
   "gettext-domain": "gse.panel-calc-rpn@tyukh.github.io"
+  "session-modes": ["user", "unlock-dialog"],
+  "settings-schema": "org.gnome.shell.extensions.gse.panel-calc-rpn"
 }
