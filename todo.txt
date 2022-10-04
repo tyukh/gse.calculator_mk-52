@@ -1,7 +1,7 @@
 [done] Transfer schema name into metadata
 [done] Class Extension extend GObject.Object
-Transfer settings signal receivers into Extension
-Apply moving icon on panel
-Apply changing font (enable/disable)
+[done] Transfer settings signal receivers into Extension
+[done] Apply moving icon on panel
+[done] Apply changing font (enable/disable)
 Extend icon with last result and add settings for that
 In prefs.ui for ComboBoxText items section need add attribute <item ... translatable="yes">

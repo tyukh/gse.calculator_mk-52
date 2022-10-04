@@ -14,15 +14,15 @@
 	(6,4,"GtkListBoxRow",None,3,None,None,None,None),
 	(6,5,"GtkGrid",None,4,None,None,None,None),
 	(6,6,"GtkLabel",None,5,None,None,None,None),
-	(6,7,"GtkFontButton","fontFamily",5,None,None,None,2),
+	(6,7,"GtkFontButton","font",5,None,None,None,2),
 	(6,8,"GtkListBoxRow",None,3,None,None,None,1),
 	(6,9,"GtkGrid",None,8,None,None,None,None),
 	(6,10,"GtkLabel",None,9,None,None,None,None),
-	(6,11,"GtkComboBoxText","iconPanel",9,None,None,None,2),
+	(6,11,"GtkComboBoxText","launcherPanel",9,None,None,None,2),
 	(6,12,"GtkListBoxRow",None,3,None,None,None,2),
 	(6,13,"GtkGrid",None,12,None,None,None,None),
 	(6,14,"GtkLabel",None,13,None,None,None,None),
-	(6,15,"GtkComboBoxText","iconPosition",13,None,None,None,2),
+	(6,15,"GtkComboBoxText","launcherPosition",13,None,None,None,2),
 	(6,16,"GtkBox",None,5,None,None,None,1),
 	(6,17,"GtkBox",None,9,None,None,None,1),
 	(6,18,"GtkBox",None,13,None,None,None,1)
@@ -50,7 +50,7 @@
 	(6,5,"GtkWidget","margin-end","10",None,None,None,None,None),
 	(6,5,"GtkWidget","margin-start","10",None,None,None,None,None),
 	(6,5,"GtkWidget","margin-top","10",None,None,None,None,None),
-	(6,6,"GtkLabel","label","Extension font","yes",None,None,None,None),
+	(6,6,"GtkLabel","label","Extension interface font","yes",None,None,None,None),
 	(6,6,"GtkWidget","can-focus","False",None,None,None,None,None),
 	(6,6,"GtkWidget","halign","start",None,None,None,None,None),
 	(6,6,"GtkWidget","hexpand","True",None,None,None,None,None),
@@ -67,7 +67,7 @@
 	(6,9,"GtkWidget","margin-end","10",None,None,None,None,None),
 	(6,9,"GtkWidget","margin-start","10",None,None,None,None,None),
 	(6,9,"GtkWidget","margin-top","10",None,None,None,None,None),
-	(6,10,"GtkLabel","label","Icon panel","yes",None,None,None,None),
+	(6,10,"GtkLabel","label","Extension icon panel group position","yes",None,None,None,None),
 	(6,10,"GtkWidget","can-focus","False",None,None,None,None,None),
 	(6,10,"GtkWidget","halign","start",None,None,None,None,None),
 	(6,10,"GtkWidget","hexpand","True",None,None,None,None,None),
@@ -81,7 +81,8 @@
 	(6,13,"GtkWidget","margin-end","10",None,None,None,None,None),
 	(6,13,"GtkWidget","margin-start","10",None,None,None,None,None),
 	(6,13,"GtkWidget","margin-top","10",None,None,None,None,None),
-	(6,14,"GtkLabel","label","Icon postion","yes",None,None,None,None),
+	(6,14,"GtkLabel","label","Extension icon postion in panel group","yes",None,None,None,None),
+	(6,14,"GtkLabel","wrap","True",None,None,None,None,None),
 	(6,14,"GtkWidget","can-focus","False",None,None,None,None,None),
 	(6,14,"GtkWidget","halign","start",None,None,None,None,None),
 	(6,14,"GtkWidget","hexpand","True",None,None,None,None,None),
@@ -106,9 +107,9 @@
 	(6,13,18,"GtkGridLayoutChild","column","1",None,None,None,None)
   </object_layout_property>
   <object_signal>
-	(3,6,7,"GtkFontButton","font-set","_onFontFamilyFontSet",None,None,None,None,None),
-	(4,6,11,"GtkComboBox","changed","_onIconPanelChanged",None,None,None,None,None),
-	(5,6,15,"GtkComboBox","changed","_onIconPositionChanged",None,None,None,None,None)
+	(3,6,7,"GtkFontButton","font-set","_onFontSet",None,None,None,None,None),
+	(4,6,11,"GtkComboBox","changed","_onLauncherPanelChanged",None,None,None,None,None),
+	(5,6,15,"GtkComboBox","changed","_onLauncherPositionChanged",None,None,None,None,None)
   </object_signal>
   <object_data>
 	(6,11,"GtkComboBoxText",1,1,None,None,None),

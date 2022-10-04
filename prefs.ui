@@ -47,7 +47,7 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
                         <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Extension font</property>
+                        <property name="label" translatable="yes">Extension interface font</property>
                         <layout>
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -63,13 +63,13 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFontButton" id="fontFamily">
+                      <object class="GtkFontButton" id="font">
                         <property name="can-focus">False</property>
                         <property name="font">monospace</property>
                         <property name="halign">end</property>
                         <property name="level">family</property>
                         <property name="use-font">True</property>
-                        <signal name="font-set" handler="_onFontFamilyFontSet"/>
+                        <signal name="font-set" handler="_onFontSet"/>
                         <layout>
                           <property name="column">2</property>
                           <property name="row">0</property>
@@ -96,7 +96,7 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
                         <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Icon panel</property>
+                        <property name="label" translatable="yes">Extension icon panel group position</property>
                         <layout>
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -112,10 +112,10 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                       </object>
                     </child>
                     <child>
-                      <object class="GtkComboBoxText" id="iconPanel">
+                      <object class="GtkComboBoxText" id="launcherPanel">
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
-                        <signal name="changed" handler="_onIconPanelChanged"/>
+                        <signal name="changed" handler="_onLauncherPanelChanged"/>
                         <items>
                           <item id="0">left</item>
                           <item id="1">center</item>
@@ -147,7 +147,8 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
                         <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Icon postion</property>
+                        <property name="label" translatable="yes">Extension icon postion in panel group</property>
+                        <property name="wrap">True</property>
                         <layout>
                           <property name="column">0</property>
                           <property name="row">0</property>
@@ -163,10 +164,10 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
                       </object>
                     </child>
                     <child>
-                      <object class="GtkComboBoxText" id="iconPosition">
+                      <object class="GtkComboBoxText" id="launcherPosition">
                         <property name="can-focus">False</property>
                         <property name="halign">end</property>
-                        <signal name="changed" handler="_onIconPositionChanged"/>
+                        <signal name="changed" handler="_onLauncherPositionChanged"/>
                         <items>
                           <item id="0">first</item>
                           <item id="-1">last</item>

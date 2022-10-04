@@ -25,35 +25,35 @@ const Me = ExtensionUtils.getCurrentExtension();
 const PrefsWidget = GObject.registerClass({
     GTypeName: 'PrefsWidget',
     Template: Me.dir.get_child('prefs.ui').get_uri(),
-    InternalChildren: ['fontFamily', 'iconPanel', 'iconPosition']
+    InternalChildren: ['font', 'launcherPanel', 'launcherPosition']
 }, class PrefsWidget extends Gtk.Box {
-    _init(params = {}) {
-        super._init(params);
+    constructor(properties = {}) {
+        super(properties);
 
-        this._settings = ExtensionUtils.getSettings(); // 'org.gnome.shell.extensions.gse.panel-calc-rpn'
+        this._settings = ExtensionUtils.getSettings();
 
-        this._fontFamily.set_font(this._settings.get_string('font-family'));
-        this._iconPanel.set_active_id(this._settings.get_enum('icon-panel').toString());
-        this._iconPosition.set_active_id(this._settings.get_enum('icon-position').toString());
+        this._font.set_font(this._settings.get_string('font'));
+        this._launcherPanel.set_active_id(this._settings.get_enum('launcher-panel').toString());
+        this._launcherPosition.set_active_id(this._settings.get_enum('launcher-position').toString());
 
         //this._settings.bind('font-family', this._fontFamily, 'value', Gio.SettingsBindFlags.DEFAULT);
-    }  
-
-    _onFontFamilyFontSet() {
-        this._settings.set_string('font-family', this._fontFamily.get_font_family().get_name());
     }
 
-    _onIconPanelChanged() {
-        this._settings.set_enum('icon-panel', parseInt(this._iconPanel.get_active_id()));
+    _onFontSet() {
+        this._settings.set_string('font', this._font.get_font_family().get_name());
     }
 
-    _onIconPositionChanged() {
-        this._settings.set_enum('icon-position', parseInt(this._iconPosition.get_active_id()));
+    _onLauncherPanelChanged() {
+        this._settings.set_enum('launcher-panel', parseInt(this._launcherPanel.get_active_id()));
+    }
+
+    _onLauncherPositionChanged() {
+        this._settings.set_enum('launcher-position', parseInt(this._launcherPosition.get_active_id()));
     }
 });
 
 function init() {
-    ExtensionUtils.initTranslations(); // Me.metadata.uuid
+    ExtensionUtils.initTranslations();
 }
 
 function buildPrefsWidget() {

@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-icon-position">
+  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-position">
     <value value="0" nick="first"/>    
     <value value="-1" nick="last"/>    
   </enum>
-  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-icon-panel">
+  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-panel">
     <value value="0" nick="left"/>
     <value value="1" nick="center"/>
     <value value="2" nick="right"/>
   </enum>
   <schema id="org.gnome.shell.extensions.gse.panel-calc-rpn" path="/org/gnome/shell/extensions/gse.panel-calc-rpn/">
     <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
-    <key name="font-family" type="s">
+    <key name="font" type="s">
       <default>"monospace"</default>
       <summary>summary</summary>
       <description>description</description>
     </key>
-    <key name="icon-panel" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-icon-panel">
+    <key name="launcher-panel" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-panel">
       <default>"center"</default>
       <summary>summary</summary>
       <description>description</description>
     </key>
-    <key name="icon-position" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-icon-position">
+    <key name="launcher-position" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-position">
       <default>"last"</default>
       <summary>summary</summary>
       <description>description</description>

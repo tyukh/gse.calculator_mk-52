@@ -29,10 +29,9 @@ const _ = Domain.gettext;
 const ngettext = Domain.ngettext;
 
 const Main = imports.ui.main;
-const Calculator = Me.imports.interface;
+const Interface = Me.imports.interface;
 
 const Extension = GObject.registerClass({
-    GTypeName: 'Extension',
     Properties: {
         'uuid': GObject.ParamSpec.string(
             'uuid',
@@ -40,17 +39,26 @@ const Extension = GObject.registerClass({
             'A read-write string property',
             GObject.ParamFlags.READWRITE,
             ''
-        ),
+        )
     }
 }, class Extension extends GObject.Object {
     constructor(properties = {}) {
         super(properties);
 
-        ExtensionUtils.initTranslations(); // Me.metadata.uuid
+        ExtensionUtils.initTranslations();
+
+        this._settings = ExtensionUtils.getSettings();
+
+        this._settings.connect('changed::font', this._onExtensionSettingsChanged.bind(this));
+        this._settings.connect('changed::launcher-panel', this._onExtensionSettingsChanged.bind(this));
+        this._settings.connect('changed::launcher-position', this._onExtensionSettingsChanged.bind(this));
+
+        this._font = this._settings.get_string('font');
+        this._launcherPanel = this._settings.get_enum('launcher-panel');
+        this._launcherPosition = this._settings.get_enum('launcher-position');
     }
 
-    get uuid () {
-        // Implementing the default value manually
+    get uuid() {
         if (this._uuid === undefined)
             this._uuid = null;
 
@@ -58,23 +66,16 @@ const Extension = GObject.registerClass({
     }
 
     set uuid(value) {
-        // Skip emission if the value has not changed
-        if (this._uuid === value)
-            return;
-
-        // Set the property value before emitting
-        this._uuid = value;
+        if (this._uuid !== value)
+            this._uuid = value;
     }
 
-    /*class Extension {
-        constructor(uuid) {
-            this._uuid = uuid;
-    
-            ExtensionUtils.initTranslations(); // Me.metadata.uuid
-        }*/
-
     enable() {
-        this._calculator = new Calculator.Calculator();
+        let position = ["left", "center", "right"];
+
+        this._calculator = new Interface.Calculator({
+            font: this._font
+        });
         /* 
          * In here we are adding the button in the status area
          * - `PopupMenuExample` is tha role, must be unique. You can access it from the Looking Glass  in 'Main.panel.statusArea.PopupMenuExample`
@@ -82,19 +83,27 @@ const Extension = GObject.registerClass({
          * - 0 is the position
          * - `right` is the box where we want our button to be displayed (left/center/right)
          */
-        // Main.panel.addToStatusArea(this._uuid, this._calculator);
-        Main.panel.addToStatusArea(this._uuid, this._calculator, this._calculator.iconPosition, this._calculator.iconPanel);
+        Main.panel.addToStatusArea(this._uuid, this._calculator.launcher, this._launcherPosition, position[this._launcherPanel]);
+
     }
 
     disable() {
         this._calculator.destroy();
         this._calculator = null;
     }
+
+    _onExtensionSettingsChanged() {
+        this._font = this._settings.get_string('font');
+        this._launcherPanel = this._settings.get_enum('launcher-panel');
+        this._launcherPosition = this._settings.get_enum('launcher-position');
+
+        this.disable();
+        this.enable();
+    }
 });
 
 function init(meta) {
-        return new Extension({
-            uuid: meta.uuid
-        });
-        //    return new Extension(meta.uuid);
-    }
+    return new Extension({
+        uuid: meta.uuid
+    });
+}
