@@ -109,7 +109,7 @@ var Calculator = GObject.registerClass({
     }
 
     destroy() {
-        if(this._launcher !== null) {
+        if (this._launcher !== null) {
             this._launcher.destroy();
             this._launcher = null;
         }
@@ -336,14 +336,6 @@ var Calculator = GObject.registerClass({
     }
 
     _initKeyboard(keyboardArea, font) {
-        let keyboardBox = new St.BoxLayout({
-            vertical: true,
-            x_expand: true,
-            y_expand: true,
-            y_align: Clutter.ActorAlign.CENTER,
-            style_class: 'panel-calc-rpn-BoxLayout'
-        });
-
         let keyMatrix = [
             {
                 keys: [
@@ -520,6 +512,29 @@ var Calculator = GObject.registerClass({
             }
         ];
 
+        let controlButtons = [
+            {
+                icon: 'edit-copy-symbolic',
+                handler: this._onCopyButtonClicked.bind(this)
+            },
+            {
+                icon: 'org.gnome.Settings-symbolic',
+                handler: this._onSettingsButtonClicked.bind(this)
+            },
+            {
+                icon: 'help-about-symbolic',
+                handler: this._onHelpButtonClicked.bind(this)
+            }
+        ];
+
+        let keyboardBox = new St.BoxLayout({
+            vertical: true,
+            x_expand: true,
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+            style_class: 'panel-calc-rpn-BoxLayout'
+        });
+
         keyMatrix.forEach(row => {
             let lineKeyboardBox = new St.BoxLayout({
                 vertical: false,
@@ -609,35 +624,25 @@ var Calculator = GObject.registerClass({
                         y_align: Clutter.ActorAlign.FILL,
                         style_class: 'panel-calc-rpn-controlBoxLayout'
                     });
-                    let settingsButton = new St.Button({
-                        can_focus: true,
-                        reactive: true,
-                        track_hover: true,
-                        icon_name: 'org.gnome.Settings-symbolic',
-                        style_class: 'panel-calc-rpn-controlButton',
-                        x_align: Clutter.ActorAlign.END,
-                        y_align: Clutter.ActorAlign.CENTER
-                    });
-                    let helpButton = new St.Button({
-                        can_focus: true,
-                        reactive: true,
-                        track_hover: true,
-                        icon_name: 'help-about-symbolic',
-                        style_class: 'panel-calc-rpn-controlButton',
-                        x_align: Clutter.ActorAlign.END,
-                        y_align: Clutter.ActorAlign.CENTER
-                    });
-                    settingsButton.connect('clicked', this._onSettingsButtonClicked.bind(this));
-                    helpButton.connect('clicked', this._onHelpButtonClicked.bind(this));
-
                     controlBox.add_actor(new St.BoxLayout({
                         vertical: false,
                         x_expand: true,
                         x_align: Clutter.ActorAlign.CENTER,
                         y_align: Clutter.ActorAlign.FILL
                     }));
-                    controlBox.add_actor(settingsButton);
-                    controlBox.add_actor(helpButton);
+                    controlButtons.forEach(controlButton => {
+                        let button = new St.Button({
+                            can_focus: true,
+                            reactive: true,
+                            track_hover: true,
+                            icon_name: controlButton.icon,
+                            style_class: 'panel-calc-rpn-controlButton',
+                            x_align: Clutter.ActorAlign.END,
+                            y_align: Clutter.ActorAlign.CENTER
+                        });
+                        button.connect('clicked', controlButton.handler);
+                        controlBox.add_actor(button);
+                    });
                     lineKeyboardBox.add_actor(controlBox);
                 }
             })
@@ -834,6 +839,9 @@ var Calculator = GObject.registerClass({
     }
 
     _onHelpButtonClicked() {
+    }
+
+    _onCopyButtonClicked() {
     }
 }
 );
