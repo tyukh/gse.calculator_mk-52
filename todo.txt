@@ -5,6 +5,6 @@
 [done] Apply changing font (enable/disable)
 Folders restructure (ui/src/etc) and gscopy.sh change
 Extend icon with last result and add settings for that
-Add "system" (setting, help) button for result coping
+Add "system" (setting, help) button for result copying
 Initial translation testing
 In prefs.ui for ComboBoxText items section need add attribute <item ... translatable="yes">

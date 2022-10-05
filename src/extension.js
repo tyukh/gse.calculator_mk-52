@@ -84,7 +84,6 @@ const Extension = GObject.registerClass({
          * - `right` is the box where we want our button to be displayed (left/center/right)
          */
         Main.panel.addToStatusArea(this._uuid, this._calculator.launcher, this._launcherPosition, position[this._launcherPanel]);
-
     }
 
     disable() {
