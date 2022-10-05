@@ -24,7 +24,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 
 const PrefsWidget = GObject.registerClass({
     GTypeName: 'PrefsWidget',
-    Template: Me.dir.get_child('prefs.ui').get_uri(),
+    Template: Me.dir.get_child('ui').get_child('prefs.ui').get_uri(),
     InternalChildren: ['font', 'launcherPanel', 'launcherPosition']
 }, class PrefsWidget extends Gtk.Box {
     constructor(properties = {}) {
