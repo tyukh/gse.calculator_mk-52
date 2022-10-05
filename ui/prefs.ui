@@ -14,180 +14,67 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+ 
 SPDX-License-Identifier: GPL-2.0-or-later -->
+  <!-- interface-authors Roman Tyukh -->
   <requires lib="gtk" version="4.6"/>
-  <template class="PrefsWidget" parent="GtkBox">
-    <property name="can-focus">False</property>
-    <property name="margin-bottom">10</property>
-    <property name="margin-end">10</property>
-    <property name="margin-start">10</property>
-    <property name="margin-top">10</property>
-    <property name="orientation">vertical</property>
+  <requires lib="libadwaita" version="1.1"/>
+  <template class="Preferences" parent="AdwPreferencesPage">
+    <property name="icon-name">org.gnome.Settings-symbolic</property>
+    <property name="name">preferences</property>
+    <property name="title" translatable="yes">Preferences</property>
     <child>
-      <object class="GtkFrame">
-        <property name="can-focus">False</property>
-        <property name="child">
-          <object class="GtkListBox">
-            <property name="can-focus">False</property>
-            <property name="selection-mode">none</property>
+      <object class="AdwPreferencesGroup">
+        <property name="description" translatable="yes">Extension wide</property>
+        <property name="title" translatable="yes">Interface prefrences</property>
+        <child>
+          <object class="AdwActionRow">
+            <property name="activatable-widget">font</property>
+            <property name="subtitle" translatable="yes">Extension interface font</property>
+            <property name="title" translatable="yes">Font</property>
             <child>
-              <object class="GtkListBoxRow">
-                <property name="can-focus">False</property>
-                <property name="child">
-                  <object class="GtkGrid">
-                    <property name="can-focus">False</property>
-                    <property name="column-spacing">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
-                    <property name="margin-top">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Extension interface font</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkFontButton" id="font">
-                        <property name="can-focus">False</property>
-                        <property name="font">monospace</property>
-                        <property name="halign">end</property>
-                        <property name="level">family</property>
-                        <property name="use-font">True</property>
-                        <signal name="font-set" handler="_onFontSet"/>
-                        <layout>
-                          <property name="column">2</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkListBoxRow">
-                <property name="can-focus">False</property>
-                <property name="child">
-                  <object class="GtkGrid">
-                    <property name="can-focus">False</property>
-                    <property name="column-spacing">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
-                    <property name="margin-top">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Extension icon panel group position</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="launcherPanel">
-                        <property name="can-focus">False</property>
-                        <property name="halign">end</property>
-                        <signal name="changed" handler="_onLauncherPanelChanged"/>
-                        <items>
-                          <item id="0">left</item>
-                          <item id="1">center</item>
-                          <item id="2">right</item>
-                        </items>
-                        <layout>
-                          <property name="column">2</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkListBoxRow">
-                <property name="can-focus">False</property>
-                <property name="child">
-                  <object class="GtkGrid">
-                    <property name="can-focus">False</property>
-                    <property name="column-spacing">10</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="margin-end">10</property>
-                    <property name="margin-start">10</property>
-                    <property name="margin-top">10</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="can-focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">Extension icon postion in panel group</property>
-                        <property name="wrap">True</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="launcherPosition">
-                        <property name="can-focus">False</property>
-                        <property name="halign">end</property>
-                        <signal name="changed" handler="_onLauncherPositionChanged"/>
-                        <items>
-                          <item id="0">first</item>
-                          <item id="-1">last</item>
-                        </items>
-                        <layout>
-                          <property name="column">2</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </property>
+              <object class="GtkFontButton" id="font">
+                <property name="font">Monospace</property>
+                <property name="level">family</property>
+                <property name="use-font">True</property>
+                <signal name="font-set" handler="_onFontSet"/>
               </object>
             </child>
           </object>
-        </property>
-        <property name="margin-bottom">5</property>
-        <property name="margin-end">5</property>
-        <property name="margin-start">5</property>
-        <property name="margin-top">5</property>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="activatable-widget">launcherPanel</property>
+            <property name="subtitle" translatable="yes">Side of the panel where the extension icon placed</property>
+            <property name="title" translatable="yes">Panel group</property>
+            <child>
+              <object class="GtkComboBoxText" id="launcherPanel">
+                <signal name="changed" handler="_onLauncherPanelChanged"/>
+                <items>
+                  <item id="0">left</item>
+                  <item id="1">center</item>
+                  <item id="2">right</item>
+                </items>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwActionRow">
+            <property name="activatable-widget">launcherPosition</property>
+            <property name="subtitle" translatable="yes">Position of the extension icon in the icon group</property>
+            <property name="title" translatable="yes">Position in panel group</property>
+            <child>
+              <object class="GtkComboBoxText" id="launcherPosition">
+                <signal name="changed" handler="_onLauncherPositionChanged"/>
+                <items>
+                  <item id="0">first</item>
+                  <item id="-1">last</item>
+                </items>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </template>

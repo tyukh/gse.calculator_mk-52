@@ -18,15 +18,15 @@
 
 'use strict';
 
-const {GObject, Gtk, Gio} = imports.gi;
+const {GObject, Adw, Gio} = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-const PrefsWidget = GObject.registerClass({
-    GTypeName: 'PrefsWidget',
+const Preferences = GObject.registerClass({
+    GTypeName: 'Preferences',
     Template: Me.dir.get_child('ui').get_child('prefs.ui').get_uri(),
     InternalChildren: ['font', 'launcherPanel', 'launcherPosition']
-}, class PrefsWidget extends Gtk.Box {
+}, class Preferences extends Adw.PreferencesPage {
     constructor(properties = {}) {
         super(properties);
 
@@ -56,6 +56,6 @@ function init() {
     ExtensionUtils.initTranslations();
 }
 
-function buildPrefsWidget() {
-    return new PrefsWidget();
+function fillPreferencesWindow(window) {
+    window.add(new Preferences());
 }
