@@ -4,5 +4,6 @@
 [done] Apply moving icon on panel
 [done] Apply changing font (enable/disable)
 Extend icon with last result and add settings for that
+Add "system" (setting, help) button for result coping
 Initial translation testing
 In prefs.ui for ComboBoxText items section need add attribute <item ... translatable="yes">
