@@ -4,27 +4,24 @@
     <value value="0" nick="first"/>    
     <value value="-1" nick="last"/>    
   </enum>
-  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-panel">
-    <value value="0" nick="left"/>
-    <value value="1" nick="center"/>
-    <value value="2" nick="right"/>
-  </enum>
   <schema id="org.gnome.shell.extensions.gse.panel-calc-rpn" path="/org/gnome/shell/extensions/gse.panel-calc-rpn/">
     <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
     <key name="font" type="s">
-      <default>"monospace"</default>
-      <summary>summary</summary>
-      <description>description</description>
+      <default>"Monospace"</default>
     </key>
-    <key name="launcher-panel" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-panel">
+    <key name="launcher-panel" type="s">
+      <choices>
+        <choice value="left"/>
+        <choice value="center"/>
+        <choice value="right"/>
+      </choices>
       <default>"center"</default>
-      <summary>summary</summary>
-      <description>description</description>
     </key>
     <key name="launcher-position" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-position">
       <default>"last"</default>
-      <summary>summary</summary>
-      <description>description</description>
+    </key>
+    <key name="original-mode" type="b">
+      <default>false</default>
     </key>
   </schema>
 </schemalist>

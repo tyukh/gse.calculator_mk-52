@@ -54,7 +54,7 @@ const Extension = GObject.registerClass({
         this._settings.connect('changed::launcher-position', this._onExtensionSettingsChanged.bind(this));
 
         this._font = this._settings.get_string('font');
-        this._launcherPanel = this._settings.get_enum('launcher-panel');
+        this._launcherPanel = this._settings.get_string('launcher-panel');
         this._launcherPosition = this._settings.get_enum('launcher-position');
     }
 
@@ -71,8 +71,6 @@ const Extension = GObject.registerClass({
     }
 
     enable() {
-        let position = ["left", "center", "right"];
-
         this._calculator = new Interface.Calculator({
             font: this._font
         });
@@ -83,7 +81,7 @@ const Extension = GObject.registerClass({
          * - 0 is the position
          * - `right` is the box where we want our button to be displayed (left/center/right)
          */
-        Main.panel.addToStatusArea(this._uuid, this._calculator.launcher, this._launcherPosition, position[this._launcherPanel]);
+        Main.panel.addToStatusArea(this._uuid, this._calculator.launcher, this._launcherPosition, this._launcherPanel);
     }
 
     disable() {
@@ -93,7 +91,7 @@ const Extension = GObject.registerClass({
 
     _onExtensionSettingsChanged() {
         this._font = this._settings.get_string('font');
-        this._launcherPanel = this._settings.get_enum('launcher-panel');
+        this._launcherPanel = this._settings.get_string('launcher-panel');
         this._launcherPosition = this._settings.get_enum('launcher-position');
 
         this.disable();

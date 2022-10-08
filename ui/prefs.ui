@@ -2,7 +2,8 @@
 <!-- Created with Cambalache 0.10.3 -->
 <interface>
   <!-- interface-name prefs.ui -->
-  <!-- interface-copyright This program is free software: you can redistribute it and/or modify
+  <!-- interface-copyright 
+This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 2 of the License, or
 (at your option) any later version.
@@ -15,29 +16,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
-SPDX-License-Identifier: GPL-2.0-or-later -->
+SPDX-License-Identifier: GPL-2.0-or-later 
+  -->
   <!-- interface-authors Roman Tyukh -->
-  <requires lib="gtk" version="4.6"/>
-  <requires lib="libadwaita" version="1.1"/>
+  <requires lib="gtk" version="4.6" />
+  <requires lib="libadwaita" version="1.1" />
   <template class="Preferences" parent="AdwPreferencesPage">
     <property name="icon-name">org.gnome.Settings-symbolic</property>
     <property name="name">preferences</property>
     <property name="title" translatable="yes">Preferences</property>
     <child>
       <object class="AdwPreferencesGroup">
-        <property name="description" translatable="yes">Extension wide</property>
         <property name="title" translatable="yes">Interface prefrences</property>
+        <property name="description" translatable="yes">Extension wide</property>
         <child>
           <object class="AdwActionRow">
             <property name="activatable-widget">font</property>
-            <property name="subtitle" translatable="yes">Extension interface font</property>
             <property name="title" translatable="yes">Font</property>
+            <property name="subtitle" translatable="yes">Extension interface font</property>
             <child>
               <object class="GtkFontButton" id="font">
                 <property name="font">Monospace</property>
                 <property name="level">family</property>
                 <property name="use-font">True</property>
-                <signal name="font-set" handler="_onFontSet"/>
+                <signal name="font-set" handler="_onFontSet" />
               </object>
             </child>
           </object>
@@ -45,16 +47,27 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
         <child>
           <object class="AdwActionRow">
             <property name="activatable-widget">launcherPanel</property>
-            <property name="subtitle" translatable="yes">Side of the panel where the extension icon placed</property>
             <property name="title" translatable="yes">Panel group</property>
+            <property name="subtitle" translatable="yes">Side of the panel where the extension icon placed</property>
             <child>
-              <object class="GtkComboBoxText" id="launcherPanel">
-                <signal name="changed" handler="_onLauncherPanelChanged"/>
-                <items>
-                  <item id="0">left</item>
-                  <item id="1">center</item>
-                  <item id="2">right</item>
-                </items>
+              <object class="GtkScale" id="launcherPanel">
+                <property name="digits">0</property>
+                <property name="draw-value">True</property>
+                <property name="has-origin">False</property>
+                <property name="hexpand">True</property>
+                <property name="inverted">false</property>
+                <property name="restrict-to-fill-level">False</property>
+                <property name="show-fill-level">false</property>
+                <property name="value-pos">bottom</property>
+                <property name="adjustment">launcherPanelAdjustment</property>
+                <child>
+                  <object class="GtkAdjustment" id="launcherPanelAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">2</property>
+                    <property name="step-increment">1</property>
+                  </object>
+                </child>
+                <signal name="value-changed" handler="_onLauncherPanelChange" />
               </object>
             </child>
           </object>
@@ -62,15 +75,27 @@ SPDX-License-Identifier: GPL-2.0-or-later -->
         <child>
           <object class="AdwActionRow">
             <property name="activatable-widget">launcherPosition</property>
-            <property name="subtitle" translatable="yes">Position of the extension icon in the icon group</property>
             <property name="title" translatable="yes">Position in panel group</property>
+            <property name="subtitle" translatable="yes">Position of the extension icon in the icon group</property>
             <child>
-              <object class="GtkComboBoxText" id="launcherPosition">
-                <signal name="changed" handler="_onLauncherPositionChanged"/>
-                <items>
-                  <item id="0">first</item>
-                  <item id="-1">last</item>
-                </items>
+              <object class="GtkScale" id="launcherPosition">
+                <property name="digits">0</property>
+                <property name="draw-value">True</property>
+                <property name="has-origin">False</property>
+                <property name="hexpand">True</property>
+                <property name="inverted">false</property>
+                <property name="restrict-to-fill-level">False</property>
+                <property name="show-fill-level">false</property>
+                <property name="value-pos">bottom</property>
+                <property name="adjustment">launcherPositionAdjustment</property>
+                <child>
+                  <object class="GtkAdjustment" id="launcherPositionAdjustment">
+                    <property name="lower">0</property>
+                    <property name="upper">1</property>
+                    <property name="step-increment">1</property>
+                  </object>
+                </child>
+                <signal name="value-changed" handler="_onLauncherPositionChange" />
               </object>
             </child>
           </object>

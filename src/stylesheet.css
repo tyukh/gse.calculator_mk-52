@@ -10,9 +10,11 @@
 
 .panel-calc-rpn-stack1BoxLayout {
     padding-top: 0.5em;
+    padding-bottom: 0em;
 }
 
 .panel-calc-rpn-stack2BoxLayout {
+    padding-top: 0em;
     padding-bottom: 0.5em;
 }
 
@@ -52,7 +54,8 @@
 }
 
 .panel-calc-rpn-indicatorBoxLayout {
-    padding-top: 0.5em;
+    padding-top: 0.75em;
+    padding-bottom: 0.5em;
 }
 
 .panel-calc-rpn-indicatorMantissaBoxLayout {
@@ -67,6 +70,7 @@
 .panel-calc-rpn-indicatorExponentBoxLayout {
     color: white;
     background-color: grey;
+    height: 2.5em;
     width: 4.5em;
     margin-left: 0.3em; 
     border-radius: 0.4em;

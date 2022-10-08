@@ -65,7 +65,7 @@ var Calculator = GObject.registerClass({
             'Font family name',
             'A read-write string property',
             GObject.ParamFlags.READWRITE,
-            'monospace'
+            'Monospace'
         )
     }
 }, class Calculator extends GObject.Object {
@@ -221,12 +221,12 @@ var Calculator = GObject.registerClass({
         let valueBox = new St.BoxLayout({
             x_expand: true,
             x_align: Clutter.ActorAlign.FILL,
-            y_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-registerValueBoxLayout'
         });
         let nameBox = new St.BoxLayout({
             x_align: Clutter.ActorAlign.FILL,
-            y_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-registerNameBoxLayout'
         });
 
@@ -234,7 +234,7 @@ var Calculator = GObject.registerClass({
             text: "",
             x_expand: true,
             x_align: Clutter.ActorAlign.START,
-            y_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-registerValueLabel'
         });
         value.set_style(`font-family: ${font}`);
@@ -242,7 +242,7 @@ var Calculator = GObject.registerClass({
         let name = new St.Label({
             text: label,
             x_align: Clutter.ActorAlign.START,
-            y_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-registerNameLabel'
         });
         name.set_style(`font-family: ${font}`);
@@ -301,10 +301,12 @@ var Calculator = GObject.registerClass({
         let mantissaBox = new St.BoxLayout({
             x_expand: true,
             x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-indicatorMantissaBoxLayout'
         });
         let exponentBox = new St.BoxLayout({
             x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-indicatorExponentBoxLayout'
         });
 
@@ -312,7 +314,7 @@ var Calculator = GObject.registerClass({
             text: "",
             x_expand: true,
             x_align: Clutter.ActorAlign.START,
-            y_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-indicatorMantissaLabel'
         });
         this._mantissaIndicatorLabel.set_style(`font-family: ${font}`);
@@ -321,7 +323,7 @@ var Calculator = GObject.registerClass({
             text: "",
             x_expand: true,
             x_align: Clutter.ActorAlign.END,
-            y_align: Clutter.ActorAlign.END,
+            y_align: Clutter.ActorAlign.CENTER,
             style_class: 'panel-calc-rpn-indicatorExponentLabel'
         });
         this._exponentIndicatorLabel.set_style(`font-family: ${font}`);
