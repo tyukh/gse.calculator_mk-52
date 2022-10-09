@@ -16,10 +16,12 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+/* exported Processor enable disable */
+
 'use strict';
 
-//const Main = imports.ui.main;
-//Main.notify('Message Title', 'Message Body');
+// const Main = imports.ui.main;
+// Main.notify('Message Title', 'Message Body');
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -33,7 +35,7 @@ var Processor = class Processor {
             minE: Processor.Precision.MIN_E_VALUE,
             maxE: Processor.Precision.MAX_E_VALUE,
             toExpPos: Processor.Precision.MAX,
-            toExpNeg: -1
+            toExpNeg: -1,
         });
 
         this._x = new Decimal.Decimal(0);
@@ -58,8 +60,8 @@ var Processor = class Processor {
         MAX: 8,
         MAX_E: 2,
         MIN_E_VALUE: -99,
-        MAX_E_VALUE: 99
-    }
+        MAX_E_VALUE: 99,
+    };
 
     static Key = {
         ZERO: 0,
@@ -90,7 +92,7 @@ var Processor = class Processor {
         F: 90,
         K: 91,
 
-        RESERVED_NULL: 9999
+        RESERVED_NULL: 9999,
     };
 
     static Indicator = {
@@ -101,7 +103,7 @@ var Processor = class Processor {
         REGISTER_Z: 4,
         REGISTER_T: 5,
         REGISTER_X1: 6,
-        MODE: 7
+        MODE: 7,
     };
 
     static Mode = {
@@ -109,7 +111,7 @@ var Processor = class Processor {
         EE_MODE: 1,
         F_MODE: 2,
         K_MODE: 3,
-        E_MODE: 4
+        E_MODE: 4,
     };
 
     _clear() {
@@ -125,21 +127,21 @@ var Processor = class Processor {
     }
 
     _isReal() {
-        return (this._real == true);
+        return this._real === true;
     }
 
     _isE() {
-        return (this._mode == Processor.Mode.EE_MODE);
+        return this._mode === Processor.Mode.EE_MODE;
     }
 
     _isError() {
-        return (this._mode == Processor.Mode.E_MODE);
+        return this._mode === Processor.Mode.E_MODE;
     }
 
     _toDecimal() {
         let value = Decimal.Decimal(0);
 
-        if (this._mantissa.length == 0)
+        if (this._mantissa.length === 0)
             return value;
 
         for (let index = 0; index < this._mantissa.length; index++) {
@@ -152,93 +154,92 @@ var Processor = class Processor {
         }
 
         let power = this._exponent[0] * 10 + this._exponent[1];
-        if (this._exponentSign == true)
+        if (this._exponentSign === true)
             power = -power;
         value = value.times(Decimal.Decimal.pow(10, power));
 
-        if (this._mantissaSign == true)
+        if (this._mantissaSign === true)
             value = value.negate();
 
         return value;
     }
 
     _toIndicator() {
-        let string = "";
+        let string = '';
 
         if (this._mantissa.length > 0) {
             let index = 1;
             this._mantissa.forEach(digit => {
-                string = string + digit.toString();
-                if (index == this._fraction) {
-                    string = string + ".";
-                }
+                string += digit.toString();
+                if (index === this._fraction)
+                    string += '.';
+
                 index++;
             });
         } else {
-            string = string + "0.";
+            string += '0.';
         }
 
-        if (this._mantissaSign == true) {
-            string = "-" + string;
-        }
+        if (this._mantissaSign === true)
+            string = `-${string}`;
+
 
         return string;
     }
 
     _toIndicatorE() {
-        let string = "";
+        let string = '';
 
-        if ((this._exponent[0] != 0) && (this._exponent[1] != 0)) {
+        if ((this._exponent[0] !== 0) && (this._exponent[1] !== 0)) {
             string = string + this._exponent[0].toString() + this._exponent[1].toString();
 
-            if (this._exponentSign == true) {
-                string = "-" + string;
-            }
+            if (this._exponentSign === true)
+                string = `-${string}`;
         }
 
         return string;
     }
 
     _formatDecimalMantissa(value) {
-        let string = value.valueOf().split("e");
-        if (string[0].indexOf(".") == -1)
-            string[0] = string[0].concat(".");
+        let string = value.valueOf().split('e');
+        if (string[0].indexOf('.') === -1)
+            string[0] = string[0].concat('.');
         return string[0];
     }
 
     _formatDecimalExponent(value) {
-        let string = value.valueOf().split("e");
+        let string = value.valueOf().split('e');
         if (string.length > 1) {
-            let e = string[1].split("");
-            if (e[0] == "+")
-                e[0] = " ";
-            if (e.length == 2)
-                return e[0].concat("0", e[1]);
+            let e = string[1].split('');
+            if (e[0] === '+')
+                e[0] = ' ';
+            if (e.length === 2)
+                return e[0].concat('0', e[1]);
             else
                 return e[0].concat(e[1], e[2]);
         }
-        return "";
+        return '';
     }
 
     _formatDecimal(value) {
         const digit = [
-            "\u{2070}", "\u{00b9}", "\u{00b2}", "\u{00b3}", "\u{2074}",
-            "\u{2075}", "\u{2076}", "\u{2077}", "\u{2078}", "\u{2079}"
+            '\u{2070}', '\u{00b9}', '\u{00b2}', '\u{00b3}', '\u{2074}',
+            '\u{2075}', '\u{2076}', '\u{2077}', '\u{2078}', '\u{2079}',
         ];
-        let string = value.toString().split("e");
+        let string = value.toString().split('e');
         if (string.length > 1) {
-            let exp = "\u{2219}10";
-            let e = string[1].split("");
+            let exp = '\u{2219}10';
+            let e = string[1].split('');
             e.forEach(symbol => {
                 switch (symbol) {
-                    case "-":
-                        exp = exp.concat("\u{207b}");
-                        break;
-                    case "+":
-                        break;
-                    default:
-                        exp = exp.concat(digit[symbol.charCodeAt(0) - "0".charCodeAt(0)]);
-                        break;
+                case '-':
+                    exp = exp.concat('\u{207b}');
+                    break;
+                case '+':
+                    break;
+                default:
+                    exp = exp.concat(digit[symbol.charCodeAt(0) - '0'.charCodeAt(0)]);
+                    break;
                 }
             });
             return string[0].concat(exp);
@@ -294,10 +295,11 @@ var Processor = class Processor {
         this._x = this._y;
         this._y = this._z;
         this._z = this._t;
+        this._t = Decimal.Decimal(0);
     }
 
     __setE() {
-        if (this._mantissa.length == 0) {
+        if (this._mantissa.length === 0) {
             this._mantissa.push(1);
             this._mantissa._fraction = 1;
         }
@@ -305,20 +307,18 @@ var Processor = class Processor {
     }
 
     __point() {
-        if (this._isE()) {
+        if (this._isE())
             this._error = true;
-        } else {
+        else
             this._real = true;
-        }
     }
 
     __digit(value) {
         if (!this._isE()) {
             if (this._mantissa.length < Processor.Precision.MAX) {
                 this._mantissa.push(value);
-                if (!this._isReal()) {
+                if (!this._isReal())
                     this._fraction = this._mantissa.length;
-                }
             }
             this._x = this._toDecimal();
             this._updateIndicatorsAfterMantissa();
@@ -331,8 +331,7 @@ var Processor = class Processor {
     }
 
     __negate() {
-        if (this._isE()) {
-        } else {
+        if (!this._isE()) {
             this._x.negate();
             this._updateIndicatorsAfterOp();
             this._clear();
@@ -394,90 +393,89 @@ var Processor = class Processor {
         this._clear();
     }
 
-    keyPressed (key) {
+    keyPressed(key) {
         switch (key) {
-            case Processor.Key.ZERO:
-                this.__digit(0);
-                break;
+        case Processor.Key.ZERO:
+            this.__digit(0);
+            break;
 
-            case Processor.Key.ONE:
-                this.__digit(1);
-                break;
+        case Processor.Key.ONE:
+            this.__digit(1);
+            break;
 
-            case Processor.Key.TWO:
-                this.__digit(2);
-                break;
+        case Processor.Key.TWO:
+            this.__digit(2);
+            break;
 
-            case Processor.Key.THREE:
-                this.__digit(3);
-                break;
+        case Processor.Key.THREE:
+            this.__digit(3);
+            break;
 
-            case Processor.Key.FOUR:
-                this.__digit(4);
-                break;
+        case Processor.Key.FOUR:
+            this.__digit(4);
+            break;
 
-            case Processor.Key.FIVE:
-                this.__digit(5);
-                break;
+        case Processor.Key.FIVE:
+            this.__digit(5);
+            break;
 
-            case Processor.Key.SIX:
-                this.__digit(6);
-                break;
+        case Processor.Key.SIX:
+            this.__digit(6);
+            break;
 
-            case Processor.Key.SEVEN:
-                this.__digit(7);
-                break;
+        case Processor.Key.SEVEN:
+            this.__digit(7);
+            break;
 
-            case Processor.Key.EIGHT:
-                this.__digit(8);
-                break;
+        case Processor.Key.EIGHT:
+            this.__digit(8);
+            break;
 
-            case Processor.Key.NINE:
-                this.__digit(9);
-                break;
+        case Processor.Key.NINE:
+            this.__digit(9);
+            break;
 
-            case Processor.Key.PERIOD:
-                this.__point();
-                break;
+        case Processor.Key.PERIOD:
+            this.__point();
+            break;
 
-            case Processor.Key.PLUS:
-                this.__add();
-                break;
+        case Processor.Key.PLUS:
+            this.__add();
+            break;
 
-            case Processor.Key.MINUS:
-                this.__subtract();
-                break;
+        case Processor.Key.MINUS:
+            this.__subtract();
+            break;
 
-            case Processor.Key.MULTIPLY:
-                this.__multiply();
-                break;
+        case Processor.Key.MULTIPLY:
+            this.__multiply();
+            break;
 
-            case Processor.Key.DIVIDE:
+        case Processor.Key.DIVIDE:
 
-                break;
+            break;
 
-            case Processor.Key.SIGN:
-                this.__negate();
-                break;
+        case Processor.Key.SIGN:
+            this.__negate();
+            break;
 
-            case Processor.Key.PUSH:
-                this.__push();
-                break;
+        case Processor.Key.PUSH:
+            this.__push();
+            break;
 
-            case Processor.Key.SWAP:
-                this.__swap();
-                break;
+        case Processor.Key.SWAP:
+            this.__swap();
+            break;
 
-            case Processor.Key.BACK_X:
-                this.__backX();
-                break;
+        case Processor.Key.BACK_X:
+            this.__backX();
+            break;
 
-            case Processor.Key.CLEAR_X:
-                this.__clearX();
-                break;
+        case Processor.Key.CLEAR_X:
+            this.__clearX();
+            break;
 
-            default:
-                return;
+        default:
         }
     }
 };

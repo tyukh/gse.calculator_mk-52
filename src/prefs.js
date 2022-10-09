@@ -16,9 +16,13 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+/* eslint-disable jsdoc/require-jsdoc */
+/* exported init enable disable */
+/* exported fillPreferencesWindow enable disable */
+
 'use strict';
 
-const { GObject, Adw, Gio, Gtk } = imports.gi;
+const {GObject, Adw, Gtk} = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -26,12 +30,12 @@ const Gettext = imports.gettext;
 
 const Domain = Gettext.domain(Me.metadata.uuid);
 const _ = Domain.gettext;
-const ngettext = Domain.ngettext;
+// const ngettext = Domain.ngettext;
 
 const Preferences = GObject.registerClass({
     GTypeName: 'Preferences',
     Template: Me.dir.get_child('ui').get_child('prefs.ui').get_uri(),
-    InternalChildren: ['font', 'launcherPanel', 'launcherPosition']
+    InternalChildren: ['font', 'launcherPanel', 'launcherPosition'],
 }, class Preferences extends Adw.PreferencesPage {
     constructor(window, properties = {}) {
         super(properties);
@@ -39,8 +43,8 @@ const Preferences = GObject.registerClass({
         this._settings = ExtensionUtils.getSettings();
 
         this._font.set_font(this._settings.get_string('font'));
-        this._launcherPanel.set_value((["left", "center", "right"]).indexOf(this._settings.get_string('launcher-panel')));
-        this._launcherPosition.set_value(([0, -1]).indexOf(this._settings.get_enum('launcher-position')));
+        this._launcherPanel.set_value(['left', 'center', 'right'].indexOf(this._settings.get_string('launcher-panel')));
+        this._launcherPosition.set_value([0, -1].indexOf(this._settings.get_enum('launcher-position')));
 
         /*
                 this._launcherPanel.set_format_value_func(([], value) => {
@@ -52,21 +56,21 @@ const Preferences = GObject.registerClass({
         */
 
         this._launcherPanel.set_format_value_func(() => {
-            return _("icon");
+            return _('icon');
         });
         this._launcherPosition.set_format_value_func(() => {
-            return _("icon");
+            return _('icon');
         });
 
-        window.connect("close-request", () => {
+        window.connect('close-request', () => {
             this._launcherPanel.set_format_value_func(null);
             this._launcherPosition.set_format_value_func(null);
         });
 
-        ([_("left"), _("center"), _("right")]).forEach((label, index) => {
+        [_('left'), _('center'), _('right')].forEach((label, index) => {
             this._launcherPanel.add_mark(index, Gtk.PositionType.BOTTOM, label);
         });
-        ([_("first"), _("last")]).forEach((label, index) => {
+        [_('first'), _('last')].forEach((label, index) => {
             this._launcherPosition.add_mark(index, Gtk.PositionType.BOTTOM, label);
         });
     }
@@ -76,11 +80,11 @@ const Preferences = GObject.registerClass({
     }
 
     _onLauncherPanelChange() {
-        this._settings.set_string('launcher-panel', (["left", "center", "right"]).at(this._launcherPanel.get_value()));
+        this._settings.set_string('launcher-panel', ['left', 'center', 'right'].at(this._launcherPanel.get_value()));
     }
 
     _onLauncherPositionChange() {
-        this._settings.set_enum('launcher-position', ([0, -1]).at(this._launcherPosition.get_value()));
+        this._settings.set_enum('launcher-position', [0, -1].at(this._launcherPosition.get_value()));
     }
 });
 

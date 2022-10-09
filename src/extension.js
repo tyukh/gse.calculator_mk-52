@@ -16,9 +16,12 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
+/* eslint-disable jsdoc/require-jsdoc */
+/* exported init enable disable */
+
 'use strict';
 
-const { GObject, Gio } = imports.gi;
+const {GObject} = imports.gi;
 const Gettext = imports.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -26,7 +29,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 
 const Domain = Gettext.domain(Me.metadata.uuid);
 const _ = Domain.gettext;
-const ngettext = Domain.ngettext;
+// const ngettext = Domain.ngettext;
 
 const Main = imports.ui.main;
 const Interface = Me.imports.interface;
@@ -39,8 +42,8 @@ const Extension = GObject.registerClass({
             'A read-write string property',
             GObject.ParamFlags.READWRITE,
             ''
-        )
-    }
+        ),
+    },
 }, class Extension extends GObject.Object {
     constructor(properties = {}) {
         super(properties);
@@ -72,10 +75,9 @@ const Extension = GObject.registerClass({
 
     enable() {
         this._calculator = new Interface.Calculator({
-            font: this._font
+            font: this._font,
         });
-        /* 
-         * In here we are adding the button in the status area
+        /* In here we are adding the button in the status area
          * - `PopupMenuExample` is tha role, must be unique. You can access it from the Looking Glass  in 'Main.panel.statusArea.PopupMenuExample`
          * - button is and instance of panelMenu.Button
          * - 0 is the position
@@ -101,6 +103,6 @@ const Extension = GObject.registerClass({
 
 function init(meta) {
     return new Extension({
-        uuid: meta.uuid
+        uuid: meta.uuid,
     });
 }
