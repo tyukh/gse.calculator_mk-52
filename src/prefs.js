@@ -18,7 +18,7 @@
 
 'use strict';
 
-const { GObject, Adw, Gio } = imports.gi;
+const { GObject, Adw, Gio, Gtk } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -42,15 +42,32 @@ const Preferences = GObject.registerClass({
         this._launcherPanel.set_value((["left", "center", "right"]).indexOf(this._settings.get_string('launcher-panel')));
         this._launcherPosition.set_value(([0, -1]).indexOf(this._settings.get_enum('launcher-position')));
 
-        this._launcherPanel.set_format_value_func(([], value) => {
-            return ([_("left"), _("center"), _("right")]).at(value);
+        /*
+                this._launcherPanel.set_format_value_func(([], value) => {
+                    return ([_("left"), _("center"), _("right")]).at(value);
+                });
+                this._launcherPosition.set_format_value_func(([], value) => {
+                    return ([_("first"), _("last")]).at(value);
+                });
+        */
+
+        this._launcherPanel.set_format_value_func(() => {
+            return _("icon");
         });
-        this._launcherPosition.set_format_value_func(([], value) => {
-            return ([_("first"), _("last")]).at(value);
+        this._launcherPosition.set_format_value_func(() => {
+            return _("icon");
         });
+
         window.connect("close-request", () => {
             this._launcherPanel.set_format_value_func(null);
             this._launcherPosition.set_format_value_func(null);
+        });
+
+        ([_("left"), _("center"), _("right")]).forEach((label, index) => {
+            this._launcherPanel.add_mark(index, Gtk.PositionType.BOTTOM, label);
+        });
+        ([_("first"), _("last")]).forEach((label, index) => {
+            this._launcherPosition.add_mark(index, Gtk.PositionType.BOTTOM, label);
         });
     }
 
