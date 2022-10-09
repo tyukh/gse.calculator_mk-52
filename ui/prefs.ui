@@ -21,6 +21,16 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <!-- interface-authors Roman Tyukh -->
   <requires lib="gtk" version="4.6" />
   <requires lib="libadwaita" version="1.1" />
+  <object class="GtkAdjustment" id="launcherPanelAdjustment">
+    <property name="lower">0</property>
+    <property name="upper">2</property>
+    <property name="step-increment">1</property>
+  </object>
+  <object class="GtkAdjustment" id="launcherPositionAdjustment">
+    <property name="lower">0</property>
+    <property name="upper">1</property>
+    <property name="step-increment">1</property>
+  </object>
   <template class="Preferences" parent="AdwPreferencesPage">
     <property name="icon-name">org.gnome.Settings-symbolic</property>
     <property name="name">preferences</property>
@@ -60,13 +70,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="show-fill-level">false</property>
                 <property name="value-pos">bottom</property>
                 <property name="adjustment">launcherPanelAdjustment</property>
-                <child>
-                  <object class="GtkAdjustment" id="launcherPanelAdjustment">
-                    <property name="lower">0</property>
-                    <property name="upper">2</property>
-                    <property name="step-increment">1</property>
-                  </object>
-                </child>
                 <signal name="value-changed" handler="_onLauncherPanelChange" />
               </object>
             </child>
@@ -88,13 +91,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="show-fill-level">false</property>
                 <property name="value-pos">bottom</property>
                 <property name="adjustment">launcherPositionAdjustment</property>
-                <child>
-                  <object class="GtkAdjustment" id="launcherPositionAdjustment">
-                    <property name="lower">0</property>
-                    <property name="upper">1</property>
-                    <property name="step-increment">1</property>
-                  </object>
-                </child>
                 <signal name="value-changed" handler="_onLauncherPositionChange" />
               </object>
             </child>

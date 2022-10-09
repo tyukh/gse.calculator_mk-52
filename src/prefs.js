@@ -18,7 +18,7 @@
 
 'use strict';
 
-const {GObject, Adw, Gio} = imports.gi;
+const { GObject, Adw, Gio } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -33,7 +33,7 @@ const Preferences = GObject.registerClass({
     Template: Me.dir.get_child('ui').get_child('prefs.ui').get_uri(),
     InternalChildren: ['font', 'launcherPanel', 'launcherPosition']
 }, class Preferences extends Adw.PreferencesPage {
-    constructor(properties = {}) {
+    constructor(window, properties = {}) {
         super(properties);
 
         this._settings = ExtensionUtils.getSettings();
@@ -42,10 +42,18 @@ const Preferences = GObject.registerClass({
         this._launcherPanel.set_value((["left", "center", "right"]).indexOf(this._settings.get_string('launcher-panel')));
         this._launcherPosition.set_value(([0, -1]).indexOf(this._settings.get_enum('launcher-position')));
 
-        this._launcherPanel.set_format_value_func(this._onLauncherPanelFormat.bind(this));
-        this._launcherPosition.set_format_value_func(this._onLauncherPositionFormat.bind(this));
+        this._launcherPanel.set_format_value_func(([], value) => {
+            return ([_("left"), _("center"), _("right")]).at(value);
+        });
+        this._launcherPosition.set_format_value_func(([], value) => {
+            return ([_("first"), _("last")]).at(value);
+        });
+        window.connect("close-request", () => {
+            this._launcherPanel.set_format_value_func(null);
+            this._launcherPosition.set_format_value_func(null);
+        });
     }
-    
+
     _onFontSet() {
         this._settings.set_string('font', this._font.get_font_family().get_name());
     }
@@ -57,14 +65,6 @@ const Preferences = GObject.registerClass({
     _onLauncherPositionChange() {
         this._settings.set_enum('launcher-position', ([0, -1]).at(this._launcherPosition.get_value()));
     }
-
-    _onLauncherPanelFormat(scale, value) {
-        return ([_("left"), _("center"), _("right")]).at(value);
-    }
-
-    _onLauncherPositionFormat(scale, value) {
-        return ([_("first"), _("last")]).at(value);
-    }
 });
 
 function init() {
@@ -72,5 +72,5 @@ function init() {
 }
 
 function fillPreferencesWindow(window) {
-    window.add(new Preferences());
+    window.add(new Preferences(window));
 }

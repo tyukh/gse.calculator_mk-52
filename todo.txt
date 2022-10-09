@@ -6,7 +6,6 @@
 [done] Folders restructure (ui/src/etc) and gscopy.sh change
 Initial translation testing
 "Original" mode for keys glyphs
-In prefs.ui for ComboBoxText items section need add attribute <item ... translatable="yes">
 Main calculator logic
 Extend icon with last result and add settings for that
 [partial] Add "system" (setting, help) button for result copying
