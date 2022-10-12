@@ -8,7 +8,7 @@
   <schema id="org.gnome.shell.extensions.gse.panel-calc-rpn" path="/org/gnome/shell/extensions/gse.panel-calc-rpn/">
     <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
     <key name="font" type="s">
-      <default>"Monospace"</default>
+      <default>"Cantarell"</default>
     </key>
     <key name="launcher-panel" type="s">
       <choices>

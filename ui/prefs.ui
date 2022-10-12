@@ -46,7 +46,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="subtitle" translatable="yes">Extension interface font</property>
             <child>
               <object class="GtkFontButton" id="font">
-                <property name="font">Monospace</property>
+                <property name="font">Cantarell</property>
                 <property name="level">family</property>
                 <property name="use-font">True</property>
                 <signal name="font-set" handler="_onFontSet" />

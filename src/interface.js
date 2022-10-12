@@ -66,7 +66,7 @@ var Calculator = GObject.registerClass({
             'Font family name',
             'A read-write string property',
             GObject.ParamFlags.READWRITE,
-            'Monospace'
+            'Cantarell'
         ),
     },
 }, class Calculator extends GObject.Object {
