@@ -638,11 +638,13 @@ var Calculator = GObject.registerClass({
                             can_focus: true,
                             reactive: true,
                             track_hover: true,
-                            icon_name: controlButton.icon,
                             style_class: 'panel-calc-rpn-controlButton',
                             x_align: Clutter.ActorAlign.END,
                             y_align: Clutter.ActorAlign.CENTER,
                         });
+                        button.add_actor(new St.Icon({
+                            icon_name: controlButton.icon,
+                        }));
                         button.connect('clicked', controlButton.handler);
                         controlBox.add_actor(button);
                     });

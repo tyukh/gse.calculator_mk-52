@@ -20,7 +20,7 @@
 
 'use strict';
 
-// const Main = imports.ui.main;
+const Main = imports.ui.main;
 // Main.notify('Message Title', 'Message Body');
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -140,28 +140,30 @@ var Processor = class Processor {
         if (this._integer.length === 0)
             return value;
 
-        this._integer.forEach(digit => {
-            value = value.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit));
-        });
+        let integer = this._integer.reduce(
+            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)), 
+            Decimal.Decimal(0)
+        );
 
-        this._fraction.forEach(digit => {
-            value = value.plus(Decimal.Decimal.div(Decimal.Decimal(digit), Decimal.Decimal.pow(10, value.decimalPlaces() + 1)));
-        });
-
+        let fraction = this._fraction.reduceRight(
+            (accumulator, digit) => accumulator.plus(Decimal.Decimal(digit)).div(Decimal.Decimal(10)), 
+            Decimal.Decimal(0)
+        );
+        
+        value = Decimal.Decimal.add(integer, fraction);
+        
         if (this._mantissaSign === true)
             value = value.negate();
 
-        let power = Decimal.Decimal(0);
-
-        this._exponent.forEach(digit => {
-            power = power.times(Decimal.Decimal(10));
-            power = power.plus(Decimal.Decimal(digit));
-        });
+        let exponent = this._exponent.reduce(
+            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)),
+            Decimal.Decimal(0)
+        );
 
         if (this._exponentSign === true)
-            power = power.negate();
+            exponent = exponent.negate();
 
-        value = value.times(Decimal.Decimal.pow(10, power));
+        value = value.times(Decimal.Decimal.pow(10, exponent));
 
         return value;
     }
