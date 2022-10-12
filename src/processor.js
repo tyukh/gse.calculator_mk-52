@@ -254,6 +254,8 @@ var Processor = class Processor {
         this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
     }
 
+    // remove unnecessary functions and conversions - indicator should be link only with editor, so add decimal to editor convertor
+
     _updateIndicatorsAfterMantissa() {
         this._updateRegisterIndicators();
         this._setIndicator(Processor.Indicator.MANTISSA, this._toIndicatorM());
@@ -293,6 +295,8 @@ var Processor = class Processor {
         this._t = Decimal.Decimal(0);
     }
 
+    // change to _do? section and math ops by callback functions
+
     __enterE() {
         if (this._integer.length === 0) {
             this._modeIs(Processor.Mode.INTEGER);
@@ -316,7 +320,7 @@ var Processor = class Processor {
             this._exponent[1] = value;
             break;
 
-        case Processor.Mode.READY:
+        case Processor.Mode.READY: // need clear?
             this._modeIs(Processor.Mode.INTEGER);
 
         // eslint-disable-next-line no-fallthrough
