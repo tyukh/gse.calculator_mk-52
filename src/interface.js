@@ -484,7 +484,7 @@ var Calculator = GObject.registerClass({
                         style_class: 'panel-calc-rpn-grayButton',
                     },
                     {
-                        id: Processor.Processor.Key.PERIOD,
+                        id: Processor.Processor.Key.POINT,
                         label: Calculator.Glyph.POINT,
                         labelF: Calculator.Glyph.OP_CIRCLE,
                         labelK: Calculator.Glyph.NONE,
@@ -803,7 +803,7 @@ var Calculator = GObject.registerClass({
 
             case Clutter.KEY_KP_Decimal:
             case Clutter.KEY_KP_Delete:
-                this._processor.keyPressed(Processor.Processor.Key.PERIOD);
+                this._processor.keyPressed(Processor.Processor.Key.POINT);
                 break;
 
             case Clutter.KEY_KP_Add:

@@ -20,7 +20,7 @@
 
 'use strict';
 
-const Main = imports.ui.main;
+// const Main = imports.ui.main;
 // Main.notify('Message Title', 'Message Body');
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -75,7 +75,7 @@ var Processor = class Processor {
         EIGHT: 8,
         NINE: 9,
 
-        PERIOD: 10,
+        POINT: 10,
         SIGN: 11,
         ENTER_E: 12,
 
@@ -141,19 +141,19 @@ var Processor = class Processor {
             return value;
 
         let integer = this._integer.reduce(
-            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)), 
+            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)),
             Decimal.Decimal(0)
         );
 
         let fraction = this._fraction.reduceRight(
-            (accumulator, digit) => accumulator.plus(Decimal.Decimal(digit)).div(Decimal.Decimal(10)), 
+            (accumulator, digit) => accumulator.plus(Decimal.Decimal(digit)).div(Decimal.Decimal(10)),
             Decimal.Decimal(0)
         );
-        
+
         value = Decimal.Decimal.add(integer, fraction);
-        
+
         if (this._mantissaSign === true)
-            value = value.negate();
+            value = value.neg();
 
         let exponent = this._exponent.reduce(
             (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)),
@@ -161,7 +161,7 @@ var Processor = class Processor {
         );
 
         if (this._exponentSign === true)
-            exponent = exponent.negate();
+            exponent = exponent.neg();
 
         value = value.times(Decimal.Decimal.pow(10, exponent));
 
@@ -293,9 +293,11 @@ var Processor = class Processor {
         this._t = Decimal.Decimal(0);
     }
 
-    __setE() {
-        if (this._integer.length === 0)
-            this._digit(Processor.Key.ONE);
+    __enterE() {
+        if (this._integer.length === 0) {
+            this._modeIs(Processor.Mode.INTEGER);
+            this.__digit(Processor.Key.ONE);
+        }
         this._modeIs(Processor.Mode.EXPONENT);
     }
 
@@ -338,8 +340,12 @@ var Processor = class Processor {
     }
 
     __negate() {
-        if (!this._isE()) {
-            this._x.negate();
+        if (this._isMode(Processor.Mode.EXPONENT)) {
+            this._exponentSign = !this._exponentSign;
+            this._x = this._toDecimal();
+            this._updateIndicatorsAfterExponent();
+        } else {
+            this._x = this._x.neg();
             this._updateIndicatorsAfterOp();
             this._clear();
         }
@@ -415,8 +421,12 @@ var Processor = class Processor {
             this.__digit(key);
             break;
 
-        case Processor.Key.PERIOD:
+        case Processor.Key.POINT:
             this.__point();
+            break;
+
+        case Processor.Key.ENTER_E:
+            this.__enterE();
             break;
 
         case Processor.Key.PLUS:
