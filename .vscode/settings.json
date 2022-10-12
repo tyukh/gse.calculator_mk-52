@@ -5,7 +5,8 @@
         "gettext",
         "ngettext",
         "Pango",
-        "Prefs"
+        "Prefs",
+        "tyukh"
     ],
     "editor.fontFamily": "'JetBrains Mono', 'Source Code Pro', 'monospace', monospace",
     "eslint.alwaysShowStatus": true,

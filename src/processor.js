@@ -301,6 +301,7 @@ var Processor = class Processor {
         if (this._isMode(Processor.Mode.EXPONENT))
             this._modeIs(Processor.Mode.ERROR);
         else
+        if (this._integer.length !== 0)
             this._modeIs(Processor.Mode.FRACTION);
     }
 
