@@ -32,7 +32,7 @@ const _ = Domain.gettext;
 
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Processor = Me.imports.processor;
+const Processor = Me.imports.plugin.processor;
 
 const Key = GObject.registerClass({
     Properties: {
