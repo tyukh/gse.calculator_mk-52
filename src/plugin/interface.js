@@ -90,8 +90,6 @@ var Calculator = GObject.registerClass({
         // -- Init connections
         this._processor.connectIndicators(this._onIndicatorSet.bind(this));
         this._menu.actor.connectObject('key-press-event', this._onKeyboardKeyEvent.bind(this), this);
-
-        this._processor.init();
     }
 
     get font() {
@@ -657,6 +655,32 @@ var Calculator = GObject.registerClass({
         keyboardArea.actor.add_child(keyboardBox);
     }
 
+    _formatDecimal(value) {
+        const digit = [
+            '\u{2070}', '\u{00b9}', '\u{00b2}', '\u{00b3}', '\u{2074}',
+            '\u{2075}', '\u{2076}', '\u{2077}', '\u{2078}', '\u{2079}',
+        ];
+        let string = value.split('e');
+        if (string.length > 1) {
+            let exp = '\u{2219}10';
+            let e = string[1].split('');
+            e.forEach(symbol => {
+                switch (symbol) {
+                case '-':
+                    exp = exp.concat('\u{207b}');
+                    break;
+                case '+':
+                    break;
+                default:
+                    exp = exp.concat(digit[symbol.charCodeAt(0) - '0'.charCodeAt(0)]);
+                    break;
+                }
+            });
+            return string[0].concat(exp);
+        }
+        return string[0];
+    }
+
     _onIndicatorSet(indicator, value) {
         switch (indicator) {
         case Processor.Processor.Indicator.MANTISSA:
@@ -668,23 +692,23 @@ var Calculator = GObject.registerClass({
             break;
 
         case Processor.Processor.Indicator.REGISTER_X:
-            this._xRegisterLabel.set_text(value);
+            this._xRegisterLabel.set_text(this._formatDecimal(value));
             break;
 
         case Processor.Processor.Indicator.REGISTER_Y:
-            this._yRegisterLabel.set_text(value);
+            this._yRegisterLabel.set_text(this._formatDecimal(value));
             break;
 
         case Processor.Processor.Indicator.REGISTER_Z:
-            this._zRegisterLabel.set_text(value);
+            this._zRegisterLabel.set_text(this._formatDecimal(value));
             break;
 
         case Processor.Processor.Indicator.REGISTER_T:
-            this._tRegisterLabel.set_text(value);
+            this._tRegisterLabel.set_text(this._formatDecimal(value));
             break;
 
         case Processor.Processor.Indicator.REGISTER_X1:
-            this._x1RegisterLabel.set_text(value);
+            this._x1RegisterLabel.set_text(this._formatDecimal(value));
             break;
 
         case Processor.Processor.Indicator.MODE:
@@ -720,11 +744,32 @@ var Calculator = GObject.registerClass({
     _onKeyboardKeyEvent(actor, event) {
         let state = event.get_state();
 
-        // if user has a modifier down (except capslock, numlock, alt)
+        /*
+         * BUTTON1_MASK - the first mouse button.
+         * BUTTON2_MASK - the second mouse button.
+         * BUTTON3_MASK - the third mouse button.
+         * BUTTON4_MASK - the fourth mouse button.
+         * BUTTON5_MASK - the fifth mouse button.
+         * CONTROL_MASK - the Control key.
+         * HYPER_MASK - the Hyper modifier.
+         * LOCK_MASK - a Lock key (depending on the modifier mapping of the X server this may either be CapsLock or ShiftLock).
+         * META_MASK - the Meta modifier.
+         * MOD1_MASK - normally it is the Alt key.
+         * MOD2_MASK - normally it is the Numlock key.
+         * MOD3_MASK - the sixth modifier key ( it depends on the modifier mapping of the X server which key is interpreted as this modifier).
+         * MOD4_MASK - the seventh modifier key (it depends on the modifier mapping of the X server which key is interpreted as this modifier).
+         * MOD5_MASK - the eighth modifier key ( it depends on the modifier mapping of the X server which key is interpreted as this modifier).
+         * MODIFIER_MASK - a mask covering all modifier types.
+         * RELEASE_MASK - not used in GDK itself.
+         * SHIFT_MASK - the Shift key.
+         * SUPER_MASK - the Super modifier.
+         */
+        // if user has a modifier down (except capslock, numlock, alt ...)
         // then don't handle the key press here
         state &= ~Clutter.ModifierType.LOCK_MASK;
         state &= ~Clutter.ModifierType.MOD1_MASK;
         state &= ~Clutter.ModifierType.MOD2_MASK;
+        state &= ~Clutter.ModifierType.SHIFT_MASK;
         state &= Clutter.ModifierType.MODIFIER_MASK;
 
         if (state)
@@ -732,7 +777,8 @@ var Calculator = GObject.registerClass({
 
         let symbol = event.get_key_symbol();
 
-        if ((event.get_state() & Clutter.ModifierType.MOD1_MASK) !== 0) {
+        // Shift + Key
+        if ((event.get_state() & Clutter.ModifierType.SHIFT_MASK) !== 0) {
             switch (symbol) {
             case Clutter.KEY_KP_Subtract:
                 this._processor.keyPressed(Processor.Processor.Key.SIGN);
@@ -742,98 +788,101 @@ var Calculator = GObject.registerClass({
                 this._processor.keyPressed(Processor.Processor.Key.SWAP);
                 break;
 
-            case Clutter.KEY_BackSpace:
-                this._processor.keyPressed(Processor.Processor.Key.BACK_X);
-                break;
-
             default:
                 return Clutter.EVENT_PROPAGATE;
             }
-        } else {
-            switch (symbol) {
-            case Clutter.KEY_KP_0:
-            case Clutter.KEY_KP_Insert:
-                this._processor.keyPressed(Processor.Processor.Key.ZERO);
-                break;
-
-            case Clutter.KEY_KP_1:
-            case Clutter.KEY_KP_End:
-                this._processor.keyPressed(Processor.Processor.Key.ONE);
-                break;
-
-            case Clutter.KEY_KP_2:
-            case Clutter.KEY_KP_Down:
-                this._processor.keyPressed(Processor.Processor.Key.TWO);
-                break;
-
-            case Clutter.KEY_KP_3:
-            case Clutter.KEY_KP_Page_Down:
-                this._processor.keyPressed(Processor.Processor.Key.THREE);
-                break;
-
-            case Clutter.KEY_KP_4:
-            case Clutter.KEY_KP_Left:
-                this._processor.keyPressed(Processor.Processor.Key.FOUR);
-                break;
-
-            case Clutter.KEY_KP_5:
-            case Clutter.KEY_KP_Begin:
-                this._processor.keyPressed(Processor.Processor.Key.FIVE);
-                break;
-
-            case Clutter.KEY_KP_6:
-            case Clutter.KEY_KP_Right:
-                this._processor.keyPressed(Processor.Processor.Key.SIX);
-                break;
-
-            case Clutter.KEY_KP_7:
-            case Clutter.KEY_KP_Home:
-                this._processor.keyPressed(Processor.Processor.Key.SEVEN);
-                break;
-
-            case Clutter.KEY_KP_8:
-            case Clutter.KEY_KP_Up:
-                this._processor.keyPressed(Processor.Processor.Key.EIGHT);
-                break;
-
-            case Clutter.KEY_KP_9:
-            case Clutter.KEY_KP_Page_Up:
-                this._processor.keyPressed(Processor.Processor.Key.NINE);
-                break;
-
-            case Clutter.KEY_KP_Decimal:
-            case Clutter.KEY_KP_Delete:
-                this._processor.keyPressed(Processor.Processor.Key.POINT);
-                break;
-
-            case Clutter.KEY_KP_Add:
-                this._processor.keyPressed(Processor.Processor.Key.PLUS);
-                break;
-
-            case Clutter.KEY_KP_Subtract:
-                this._processor.keyPressed(Processor.Processor.Key.MINUS);
-                break;
-
-            case Clutter.KEY_KP_Multiply:
-                this._processor.keyPressed(Processor.Processor.Key.MULTIPLY);
-                break;
-
-            case Clutter.KEY_KP_Divide:
-                this._processor.keyPressed(Processor.Processor.Key.DIVIDE);
-                break;
-
-            case Clutter.KEY_KP_Enter:
-                this._processor.keyPressed(Processor.Processor.Key.PUSH);
-                break;
-
-            case Clutter.KEY_BackSpace:
-                this._processor.keyPressed(Processor.Processor.Key.CLEAR_X);
-                break;
-
-            default:
-                return Clutter.EVENT_PROPAGATE;
-            }
+            return Clutter.EVENT_STOP;
         }
+
+        // Key & Numlock + Key
+        switch (symbol) {
+        case Clutter.KEY_KP_0:
+        case Clutter.KEY_KP_Insert:
+            this._processor.keyPressed(Processor.Processor.Key.ZERO);
+            break;
+
+        case Clutter.KEY_KP_1:
+        case Clutter.KEY_KP_End:
+            this._processor.keyPressed(Processor.Processor.Key.ONE);
+            break;
+
+        case Clutter.KEY_KP_2:
+        case Clutter.KEY_KP_Down:
+            this._processor.keyPressed(Processor.Processor.Key.TWO);
+            break;
+
+        case Clutter.KEY_KP_3:
+        case Clutter.KEY_KP_Page_Down:
+            this._processor.keyPressed(Processor.Processor.Key.THREE);
+            break;
+
+        case Clutter.KEY_KP_4:
+        case Clutter.KEY_KP_Left:
+            this._processor.keyPressed(Processor.Processor.Key.FOUR);
+            break;
+
+        case Clutter.KEY_KP_5:
+        case Clutter.KEY_KP_Begin:
+            this._processor.keyPressed(Processor.Processor.Key.FIVE);
+            break;
+
+        case Clutter.KEY_KP_6:
+        case Clutter.KEY_KP_Right:
+            this._processor.keyPressed(Processor.Processor.Key.SIX);
+            break;
+
+        case Clutter.KEY_KP_7:
+        case Clutter.KEY_KP_Home:
+            this._processor.keyPressed(Processor.Processor.Key.SEVEN);
+            break;
+
+        case Clutter.KEY_KP_8:
+        case Clutter.KEY_KP_Up:
+            this._processor.keyPressed(Processor.Processor.Key.EIGHT);
+            break;
+
+        case Clutter.KEY_KP_9:
+        case Clutter.KEY_KP_Page_Up:
+            this._processor.keyPressed(Processor.Processor.Key.NINE);
+            break;
+
+        case Clutter.KEY_KP_Decimal:
+        case Clutter.KEY_KP_Delete:
+            this._processor.keyPressed(Processor.Processor.Key.POINT);
+            break;
+
+        case Clutter.KEY_KP_Add:
+            this._processor.keyPressed(Processor.Processor.Key.PLUS);
+            break;
+
+        case Clutter.KEY_KP_Subtract:
+            this._processor.keyPressed(Processor.Processor.Key.MINUS);
+            break;
+
+        case Clutter.KEY_KP_Multiply:
+            this._processor.keyPressed(Processor.Processor.Key.MULTIPLY);
+            break;
+
+        case Clutter.KEY_KP_Divide:
+            this._processor.keyPressed(Processor.Processor.Key.DIVIDE);
+            break;
+
+        case Clutter.KEY_KP_Enter:
+            this._processor.keyPressed(Processor.Processor.Key.PUSH);
+            break;
+
+        case Clutter.KEY_BackSpace:
+            this._processor.keyPressed(Processor.Processor.Key.CLEAR_X);
+            break;
+
+        case Clutter.KEY_Alt_L:
+            this._processor.keyPressed(Processor.Processor.Key.F);
+            break;
+
+        default:
+            return Clutter.EVENT_PROPAGATE;
+        }
+
         return Clutter.EVENT_STOP;
     }
 

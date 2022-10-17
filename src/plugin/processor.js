@@ -38,6 +38,8 @@ var Processor = class Processor {
             toExpNeg: -1,
         });
 
+        this._indicatorsCallback = null;
+
         this._x = new Decimal.Decimal(0);
         this._y = new Decimal.Decimal(0);
         this._z = new Decimal.Decimal(0);
@@ -46,14 +48,12 @@ var Processor = class Processor {
         this._x0 = new Decimal.Decimal(0);
 
         this._clear();
+        this._modeIs(Processor.Mode.READY);
     }
 
     connectIndicators(callback) {
         this._indicatorsCallback = callback;
-    }
-
-    init() {
-        this._updateIndicatorsAfterOp();
+        this._output();
     }
 
     static Precision = {
@@ -107,16 +107,25 @@ var Processor = class Processor {
 
     static Mode = {
         READY: 0,
+        RESULT: 1,
+        INTEGER: 2,
+        FRACTION: 4,
+        EXPONENT: 8,
+        F: 16,
+        K: 32,
+        ERROR: 64,
+    };
+
+    static Numerals = {
+        MANTISSA_SIGN: 0,
         INTEGER: 1,
         FRACTION: 2,
-        EXPONENT: 3,
-        F: 4,
-        K: 5,
-        ERROR: 6,
+        EXPONENT_SIGN: 3,
+        EXPONENT: 4,
     };
 
     _isMode(mode) {
-        return this._mode === mode;
+        return ((this._mode & mode) !== 0) || (this._mode === mode);
     }
 
     _modeIs(mode) {
@@ -124,154 +133,69 @@ var Processor = class Processor {
     }
 
     _clear() {
-        this._mantissaSign = false;
-        this._integer = [];
-        this._fraction = [];
-
-        this._exponentSign = false;
-        this._exponent = [0, 0];
-
-        this._modeIs(Processor.Mode.READY);
+        // [MANTISSA_SIGN, INTEGER, FRACTION, EXPONENT_SIGN, EXPONENT]
+        this._number = ['', '', '', '', ''];
     }
 
     _toDecimal() {
-        let value = Decimal.Decimal(0);
-
-        if (this._integer.length === 0)
-            return value;
-
-        let integer = this._integer.reduce(
-            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)),
-            Decimal.Decimal(0)
-        );
-
-        let fraction = this._fraction.reduceRight(
-            (accumulator, digit) => accumulator.plus(Decimal.Decimal(digit)).div(Decimal.Decimal(10)),
-            Decimal.Decimal(0)
-        );
-
-        value = Decimal.Decimal.add(integer, fraction);
-
-        if (this._mantissaSign === true)
-            value = value.neg();
-
-        let exponent = this._exponent.reduce(
-            (accumulator, digit) => accumulator.times(Decimal.Decimal(10)).plus(Decimal.Decimal(digit)),
-            Decimal.Decimal(0)
-        );
-
-        if (this._exponentSign === true)
-            exponent = exponent.neg();
-
-        value = value.times(Decimal.Decimal.pow(10, exponent));
-
-        return value;
+        let integer = `${this._number[Processor.Numerals.MANTISSA_SIGN]}${this._number[Processor.Numerals.INTEGER].length === 0 ? '0' : this._number[Processor.Numerals.INTEGER]}`;
+        let fraction = `${this._number[Processor.Numerals.FRACTION].length !== 0 ? '.' : ''}${this._number[Processor.Numerals.FRACTION]}`;
+        let exponent = `${this._number[Processor.Numerals.EXPONENT].length !== 0 ? 'e' : ''}${this._number[Processor.Numerals.EXPONENT_SIGN]}${this._number[Processor.Numerals.EXPONENT]}`;
+        this._x = Decimal.Decimal(`${integer}${fraction}${exponent}`);
     }
 
-    _toIndicatorM() {
-        let string = '';
+    _fromDecimal() {
+        this._clear();
 
-        if (this._integer.length === 0)
-            string = '0.';
-        else
-            string = `${this._integer.join('')}.${this._fraction.join('')}`;
-
-        if (this._mantissaSign === true)
-            string = `-${string}`;
-
-        return string;
-    }
-
-    _toIndicatorE() {
-        let string = '';
-
-        if (this._exponent.reduce((total, value) => {
-            return total + value;
-        }) !== 0) {
-            string = this._exponent.join('');
-            if (this._exponentSign === true)
-                string = `-${string}`;
+        let eParts = this._x.valueOf().split('e');
+        let mParts = eParts[0].split('.');
+        let mSign = mParts[0].indexOf('-');
+        if (mSign === -1) {
+            this._number[Processor.Numerals.INTEGER] = mParts[0];
+        } else {
+            this._number[Processor.Numerals.MANTISSA_SIGN] = '-';
+            this._number[Processor.Numerals.INTEGER] = mParts[0].slice(mSign + 1);
         }
-        return string;
-    }
-
-    _formatDecimalM(value) {
-        let string = value.valueOf().split('e');
-        if (string[0].indexOf('.') === -1)
-            string[0] = string[0].concat('.');
-        return string[0];
-    }
-
-    _formatDecimalE(value) {
-        let string = value.valueOf().split('e');
-        if (string.length > 1) {
-            let e = string[1].split('');
-            if (e[0] === '+')
-                e[0] = ' ';
-            if (e.length === 2)
-                return e[0].concat('0', e[1]);
-            else
-                return e[0].concat(e[1], e[2]);
+        if (mParts.length > 1)
+            this._number[Processor.Numerals.FRACTION] = mParts[1];
+        if (eParts.length > 1) {
+            let eSign = eParts[1].indexOf('-');
+            if (eSign === -1) {
+                this._number[Processor.Numerals.EXPONENT] = eParts[1];
+            } else {
+                this._number[Processor.Numerals.EXPONENT_SIGN] = '-';
+                this._number[Processor.Numerals.EXPONENT] = eParts[1].slice(eSign + 1);
+            }
         }
-        return '';
     }
 
-    _formatDecimal(value) {
-        const digit = [
-            '\u{2070}', '\u{00b9}', '\u{00b2}', '\u{00b3}', '\u{2074}',
-            '\u{2075}', '\u{2076}', '\u{2077}', '\u{2078}', '\u{2079}',
-        ];
-        let string = value.toString().split('e');
-        if (string.length > 1) {
-            let exp = '\u{2219}10';
-            let e = string[1].split('');
-            e.forEach(symbol => {
-                switch (symbol) {
-                case '-':
-                    exp = exp.concat('\u{207b}');
-                    break;
-                case '+':
-                    break;
-                default:
-                    exp = exp.concat(digit[symbol.charCodeAt(0) - '0'.charCodeAt(0)]);
-                    break;
-                }
-            });
-            return string[0].concat(exp);
+    _display() {
+        this._indicatorsCallback(Processor.Indicator.REGISTER_X, this._x.toString());
+        this._indicatorsCallback(Processor.Indicator.REGISTER_Y, this._y.toString());
+        this._indicatorsCallback(Processor.Indicator.REGISTER_Z, this._z.toString());
+        this._indicatorsCallback(Processor.Indicator.REGISTER_T, this._t.toString());
+        this._indicatorsCallback(Processor.Indicator.REGISTER_X1, this._x1.toString());
+
+        if (this._isMode(Processor.Mode.ERROR)) {
+            this._indicatorsCallback(Processor.Indicator.MANTISSA, 'ERROR');
+            this._indicatorsCallback(Processor.Indicator.EXPONENT, '');
+        } else {
+            let integer = `${this._number[Processor.Numerals.MANTISSA_SIGN]}${this._number[Processor.Numerals.INTEGER].length === 0 ? '0' : this._number[Processor.Numerals.INTEGER]}`;
+            let fraction = `${this._number[Processor.Numerals.FRACTION]}`;
+            let exponent = `${this._number[Processor.Numerals.EXPONENT_SIGN]}${this._number[Processor.Numerals.EXPONENT]}`;
+            this._indicatorsCallback(Processor.Indicator.MANTISSA, `${integer}.${fraction}`);
+            this._indicatorsCallback(Processor.Indicator.EXPONENT, `${exponent}`);
         }
-        return string[0];
     }
 
-    _setIndicator(indicator, value) {
-        this._indicatorsCallback(indicator, value);
+    _input() {
+        this._toDecimal();
+        this._display();
     }
 
-    _updateRegisterIndicators() {
-        this._setIndicator(Processor.Indicator.REGISTER_X, this._formatDecimal(this._x));
-        this._setIndicator(Processor.Indicator.REGISTER_Y, this._formatDecimal(this._y));
-        this._setIndicator(Processor.Indicator.REGISTER_Z, this._formatDecimal(this._z));
-        this._setIndicator(Processor.Indicator.REGISTER_T, this._formatDecimal(this._t));
-        this._setIndicator(Processor.Indicator.REGISTER_X1, this._formatDecimal(this._x1));
-    }
-
-    // remove unnecessary functions and conversions - indicator should be link only with editor, so add decimal to editor convertor
-
-    _updateIndicatorsAfterMantissa() {
-        this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.MANTISSA, this._toIndicatorM());
-        this._setIndicator(Processor.Indicator.EXPONENT, this._toIndicatorE());
-    }
-
-    _updateIndicatorsAfterExponent() {
-        this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.MANTISSA, this._formatDecimalM(this._x));
-        this._setIndicator(Processor.Indicator.EXPONENT, this._toIndicatorE());
-    }
-
-    _updateIndicatorsAfterOp() {
-        this._updateRegisterIndicators();
-        this._setIndicator(Processor.Indicator.MANTISSA, this._formatDecimalM(this._x));
-        this._setIndicator(Processor.Indicator.EXPONENT, this._formatDecimalE(this._x));
+    _output() {
+        this._fromDecimal();
+        this._display();
     }
 
     _pushX() {
@@ -292,95 +216,94 @@ var Processor = class Processor {
         this._x = this._y;
         this._y = this._z;
         this._z = this._t;
-        this._t = Decimal.Decimal(0);
+        // this._t = Decimal.Decimal(0); prototype calculator error?
     }
 
-    // change to _do? section and math ops by callback functions
-
-    __enterE() {
-        if (this._integer.length === 0) {
+    _doEnterE() {
+        if (this._x.isZero()) {
+            this._clear();
             this._modeIs(Processor.Mode.INTEGER);
-            this.__digit(Processor.Key.ONE);
+            this._doDigit(Processor.Key.ONE);
         }
+
+        if (this._number[Processor.Numerals.EXPONENT].length === 0)
+            this._number[Processor.Numerals.EXPONENT] = ''.padStart(Processor.Precision.MAX_E, '0');
+
         this._modeIs(Processor.Mode.EXPONENT);
+
+        this._input();
     }
 
-    __point() {
+    _doPoint() {
         if (this._isMode(Processor.Mode.EXPONENT))
             this._modeIs(Processor.Mode.ERROR);
         else
-        if (this._integer.length !== 0)
+        if (this._number[Processor.Numerals.INTEGER].length !== 0)
             this._modeIs(Processor.Mode.FRACTION);
     }
 
-    __digit(value) {
-        switch (this._mode) {
-        case Processor.Mode.EXPONENT:
-            this._exponent[0] = this._exponent[1];
-            this._exponent[1] = value;
-            break;
-
-        case Processor.Mode.READY: // need clear?
-            this._modeIs(Processor.Mode.INTEGER);
-
-        // eslint-disable-next-line no-fallthrough
-        case Processor.Mode.INTEGER:
-            if ((this._integer.length + this._fraction.length) < Processor.Precision.MAX)
-                this._integer.push(value);
-            break;
-
-        case Processor.Mode.FRACTION:
-            if ((this._integer.length + this._fraction.length) < Processor.Precision.MAX)
-                this._fraction.push(value);
-            break;
+    _doDigit(value) {
+        if (this._isMode(Processor.Mode.EXPONENT)) {
+            this._number[Processor.Numerals.EXPONENT] = this._number[Processor.Numerals.EXPONENT].slice(1) + value.toString();
+        } else {
+            if (this._isMode(Processor.Mode.RESULT))
+                this._doPush();
+            if (this._isMode(Processor.Mode.READY)) {
+                this._clear();
+                this._modeIs(Processor.Mode.INTEGER);
+            }
+            if ((this._number[Processor.Numerals.INTEGER].length + this._number[Processor.Numerals.FRACTION].length) < Processor.Precision.MAX) {
+                switch (this._mode) {
+                case Processor.Mode.INTEGER:
+                    this._number[Processor.Numerals.INTEGER] += value.toString();
+                    break;
+                case Processor.Mode.FRACTION:
+                    this._number[Processor.Numerals.FRACTION] += value.toString();
+                    break;
+                }
+            }
         }
 
-        this._x = this._toDecimal();
-
-        if (this._isMode(Processor.Mode.EXPONENT))
-            this._updateIndicatorsAfterExponent();
-        else
-            this._updateIndicatorsAfterMantissa();
+        this._input();
     }
 
-    __negate() {
+    _doNegate() {
         if (this._isMode(Processor.Mode.EXPONENT)) {
-            this._exponentSign = !this._exponentSign;
-            this._x = this._toDecimal();
-            this._updateIndicatorsAfterExponent();
+            this._number[Processor.Numerals.EXPONENT_SIGN] = this._number[Processor.Numerals.EXPONENT_SIGN] === '-' ? '' : '-';
+            this._input();
         } else {
             this._x = this._x.neg();
-            this._updateIndicatorsAfterOp();
-            this._clear();
+            this._modeIs(Processor.Mode.READY);
+            this._output();
         }
     }
 
-    __clearX() {
+    _doClearX() {
         this._x = Decimal.Decimal(0);
-        this._clear();
-        this._updateIndicatorsAfterOp();
+        this._modeIs(Processor.Mode.READY);
+        this._output();
     }
 
-    __push() {
+    _doPush() {
         this._push();
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.READY);
+        this._output();
     }
 
-    __swap() {
+    _doSwap() {
         this._pushX();
         this._x0 = this._y;
         this._y = this._x;
         this._x = this._x0;
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.RESULT);
+        this._output();
     }
 
-    __backX() {
+    _doBackX() {
         this._push();
         this._popX();
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.RESULT);
+        this._output();
     }
 
     __add() {
@@ -388,8 +311,8 @@ var Processor = class Processor {
         this._x0 = this._y.plus(this._x);
         this._pop();
         this._x = this._x0;
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.RESULT);
+        this._output();
     }
 
     __subtract() {
@@ -397,8 +320,8 @@ var Processor = class Processor {
         this._x0 = this._y.minus(this._x);
         this._pop();
         this._x = this._x0;
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.RESULT);
+        this._output();
     }
 
     __multiply() {
@@ -406,11 +329,37 @@ var Processor = class Processor {
         this._x0 = this._y.times(this._x);
         this._pop();
         this._x = this._x0;
-        this._updateIndicatorsAfterOp();
-        this._clear();
+        this._modeIs(Processor.Mode.RESULT);
+        this._output();
     }
 
     keyPressed(key) {
+        if (this._isMode(Processor.Mode.F)) {
+            switch (key) {
+            case Processor.Key.PUSH:
+                key = Processor.Key.BACK_X;
+                break;
+
+            case Processor.Key.CLEAR_X:
+                this._modeIs(Processor.Mode.READY);
+                break;
+
+            default:
+                return;
+            }
+        }
+
+        if (this._isMode(Processor.Mode.K)) {
+            switch (key) {
+            case Processor.Key.ZERO:
+                this._modeIs(Processor.Mode.READY);
+                break;
+
+            default:
+                return;
+            }
+        }
+
         switch (key) {
         case Processor.Key.ZERO:
         case Processor.Key.ONE:
@@ -422,15 +371,15 @@ var Processor = class Processor {
         case Processor.Key.SEVEN:
         case Processor.Key.EIGHT:
         case Processor.Key.NINE:
-            this.__digit(key);
+            this._doDigit(key);
             break;
 
         case Processor.Key.POINT:
-            this.__point();
+            this._doPoint();
             break;
 
         case Processor.Key.ENTER_E:
-            this.__enterE();
+            this._doEnterE();
             break;
 
         case Processor.Key.PLUS:
@@ -450,23 +399,31 @@ var Processor = class Processor {
             break;
 
         case Processor.Key.SIGN:
-            this.__negate();
+            this._doNegate();
             break;
 
         case Processor.Key.PUSH:
-            this.__push();
+            this._doPush();
             break;
 
         case Processor.Key.SWAP:
-            this.__swap();
+            this._doSwap();
             break;
 
         case Processor.Key.BACK_X:
-            this.__backX();
+            this._doBackX();
             break;
 
         case Processor.Key.CLEAR_X:
-            this.__clearX();
+            this._doClearX();
+            break;
+
+        case Processor.Key.F:
+            this._modeIs(Processor.Mode.F);
+            break;
+
+        case Processor.Key.K:
+            this._modeIs(Processor.Mode.K);
             break;
 
         default:
