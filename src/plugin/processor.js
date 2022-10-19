@@ -27,6 +27,91 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Decimal = Me.imports.decimal.decimal;
 
+class Value {
+    constructor() {
+        this._empty();
+    }
+
+    get mantissa() {
+        let integer = `${this._mantissaSign}${this._integer.length === 0 ? '0' : this._integer}`;
+        let fraction = `${this._fraction}`;
+        return `${integer}.${fraction}`;
+    }
+
+    get exponent() {
+        let exponent = `${this._exponentSign}${this._exponent}`;
+        return `${exponent}`;
+    }
+
+    fromDecimal(value) {
+        this.empty();
+        let eParts = value.valueOf().split('e');
+        let mParts = eParts[0].split('.');
+        let mSign = mParts[0].indexOf('-');
+        if (mSign === -1) {
+            this._integer = mParts[0];
+        } else {
+            this._mantissaSign = '-';
+            this._integer = mParts[0].slice(mSign + 1);
+        }
+        if (mParts.length > 1)
+            this._fraction = mParts[1];
+        if (eParts.length > 1) {
+            let eSign = eParts[1].indexOf('-');
+            if (eSign === -1) {
+                this._exponent = eParts[1];
+            } else {
+                this._exponentSign = '-';
+                this._exponent = eParts[1].slice(eSign + 1);
+            }
+        }
+    }
+
+    toDecimal() {
+        let integer = `${this._mantissaSign}${this._integer.length === 0 ? '0' : this._integer}`;
+        let fraction = `${this._fraction.length !== 0 ? '.' : ''}${this._fraction}`;
+        let exponent = `${this._exponent.length !== 0 ? 'e' : ''}${this._exponentSign}${this._exponent}`;
+        return Decimal.Decimal(`${integer}${fraction}${exponent}`);
+    }
+
+    empty() {
+        this._mantissaSign = '';
+        this._integer = '';
+        this._fraction = '';
+        this._exponentSign = '';
+        this._exponent = '';
+    }
+
+    pad() {
+        if (this._exponent.length === 0)
+            this._exponent = ''.padStart(Processor.Precision.MAX_E, '0');
+    }
+
+    isInteger() {
+        return this._integer.length !== 0;
+    }
+
+    isMantissaFull() {
+        return (this._integer.length + this._fraction.length) >= Processor.Precision.MAX;
+    }
+
+    integerExtend(value) {
+        this._integer += value.toString();
+    }
+
+    fractionExtend(value) {
+        this._fraction += value.toString();
+    }
+
+    exponentExtend(value) {
+        this._exponent = this._exponent.slice(1) + value.toString();
+    }
+
+    exponentNegate() {
+        this._exponentSign = this._exponentSign === '-' ? '' : '-';
+    }
+}
+
 var Processor = class Processor {
     constructor() {
         Decimal.Decimal.set({
@@ -47,7 +132,7 @@ var Processor = class Processor {
         this._x1 = new Decimal.Decimal(0);
         this._x0 = new Decimal.Decimal(0);
 
-        this._clear();
+        this._number = new Value();
         this._modeIs(Processor.Mode.READY);
     }
 
@@ -116,57 +201,12 @@ var Processor = class Processor {
         ERROR: 64,
     };
 
-    static Numerals = {
-        MANTISSA_SIGN: 0,
-        INTEGER: 1,
-        FRACTION: 2,
-        EXPONENT_SIGN: 3,
-        EXPONENT: 4,
-    };
-
     _isMode(mode) {
         return ((this._mode & mode) !== 0) || (this._mode === mode);
     }
 
     _modeIs(mode) {
         this._mode = mode;
-    }
-
-    _clear() {
-        // [MANTISSA_SIGN, INTEGER, FRACTION, EXPONENT_SIGN, EXPONENT]
-        this._number = ['', '', '', '', ''];
-    }
-
-    _toDecimal() {
-        let integer = `${this._number[Processor.Numerals.MANTISSA_SIGN]}${this._number[Processor.Numerals.INTEGER].length === 0 ? '0' : this._number[Processor.Numerals.INTEGER]}`;
-        let fraction = `${this._number[Processor.Numerals.FRACTION].length !== 0 ? '.' : ''}${this._number[Processor.Numerals.FRACTION]}`;
-        let exponent = `${this._number[Processor.Numerals.EXPONENT].length !== 0 ? 'e' : ''}${this._number[Processor.Numerals.EXPONENT_SIGN]}${this._number[Processor.Numerals.EXPONENT]}`;
-        this._x = Decimal.Decimal(`${integer}${fraction}${exponent}`);
-    }
-
-    _fromDecimal() {
-        this._clear();
-
-        let eParts = this._x.valueOf().split('e');
-        let mParts = eParts[0].split('.');
-        let mSign = mParts[0].indexOf('-');
-        if (mSign === -1) {
-            this._number[Processor.Numerals.INTEGER] = mParts[0];
-        } else {
-            this._number[Processor.Numerals.MANTISSA_SIGN] = '-';
-            this._number[Processor.Numerals.INTEGER] = mParts[0].slice(mSign + 1);
-        }
-        if (mParts.length > 1)
-            this._number[Processor.Numerals.FRACTION] = mParts[1];
-        if (eParts.length > 1) {
-            let eSign = eParts[1].indexOf('-');
-            if (eSign === -1) {
-                this._number[Processor.Numerals.EXPONENT] = eParts[1];
-            } else {
-                this._number[Processor.Numerals.EXPONENT_SIGN] = '-';
-                this._number[Processor.Numerals.EXPONENT] = eParts[1].slice(eSign + 1);
-            }
-        }
     }
 
     _display() {
@@ -180,29 +220,26 @@ var Processor = class Processor {
             this._indicatorsCallback(Processor.Indicator.MANTISSA, 'ERROR');
             this._indicatorsCallback(Processor.Indicator.EXPONENT, '');
         } else {
-            let integer = `${this._number[Processor.Numerals.MANTISSA_SIGN]}${this._number[Processor.Numerals.INTEGER].length === 0 ? '0' : this._number[Processor.Numerals.INTEGER]}`;
-            let fraction = `${this._number[Processor.Numerals.FRACTION]}`;
-            let exponent = `${this._number[Processor.Numerals.EXPONENT_SIGN]}${this._number[Processor.Numerals.EXPONENT]}`;
-            this._indicatorsCallback(Processor.Indicator.MANTISSA, `${integer}.${fraction}`);
-            this._indicatorsCallback(Processor.Indicator.EXPONENT, `${exponent}`);
+            this._indicatorsCallback(Processor.Indicator.MANTISSA, this._number.mantissa);
+            this._indicatorsCallback(Processor.Indicator.EXPONENT, this._number.exponent);
         }
     }
 
     _input() {
-        this._toDecimal();
+        this._x = this._number.toDecimal();
         this._display();
     }
 
     _output() {
-        this._fromDecimal();
+        this._number.fromDecimal(this._x);
         this._display();
     }
 
-    _pushX() {
+    _save() {
         this._x1 = this._x;
     }
 
-    _popX() {
+    _restore() {
         this._x = this._x1;
     }
 
@@ -221,16 +258,12 @@ var Processor = class Processor {
 
     _doEnterE() {
         if (this._x.isZero()) {
-            this._clear();
+            this._number.empty();
             this._modeIs(Processor.Mode.INTEGER);
             this._doDigit(Processor.Key.ONE);
         }
-
-        if (this._number[Processor.Numerals.EXPONENT].length === 0)
-            this._number[Processor.Numerals.EXPONENT] = ''.padStart(Processor.Precision.MAX_E, '0');
-
+        this._number.pad();
         this._modeIs(Processor.Mode.EXPONENT);
-
         this._input();
     }
 
@@ -238,38 +271,37 @@ var Processor = class Processor {
         if (this._isMode(Processor.Mode.EXPONENT))
             this._modeIs(Processor.Mode.ERROR);
         else
-        if (this._number[Processor.Numerals.INTEGER].length !== 0)
+        if (this._number.isInteger())
             this._modeIs(Processor.Mode.FRACTION);
     }
 
     _doDigit(value) {
         if (this._isMode(Processor.Mode.EXPONENT)) {
-            this._number[Processor.Numerals.EXPONENT] = this._number[Processor.Numerals.EXPONENT].slice(1) + value.toString();
+            this._number.exponentExtend(value);
         } else {
             if (this._isMode(Processor.Mode.RESULT))
                 this._doPush();
             if (this._isMode(Processor.Mode.READY)) {
-                this._clear();
+                this._number.empty();
                 this._modeIs(Processor.Mode.INTEGER);
             }
-            if ((this._number[Processor.Numerals.INTEGER].length + this._number[Processor.Numerals.FRACTION].length) < Processor.Precision.MAX) {
+            if (!this._number.isMantissaFull()) {
                 switch (this._mode) {
                 case Processor.Mode.INTEGER:
-                    this._number[Processor.Numerals.INTEGER] += value.toString();
+                    this._number.integerExtend(value);
                     break;
                 case Processor.Mode.FRACTION:
-                    this._number[Processor.Numerals.FRACTION] += value.toString();
+                    this._number.fractionExtend(value);
                     break;
                 }
             }
         }
-
         this._input();
     }
 
     _doNegate() {
         if (this._isMode(Processor.Mode.EXPONENT)) {
-            this._number[Processor.Numerals.EXPONENT_SIGN] = this._number[Processor.Numerals.EXPONENT_SIGN] === '-' ? '' : '-';
+            this._number.exponentNegate();
             this._input();
         } else {
             this._x = this._x.neg();
@@ -291,7 +323,7 @@ var Processor = class Processor {
     }
 
     _doSwap() {
-        this._pushX();
+        this._save();
         this._x0 = this._y;
         this._y = this._x;
         this._x = this._x0;
@@ -301,13 +333,13 @@ var Processor = class Processor {
 
     _doBackX() {
         this._push();
-        this._popX();
+        this._restore();
         this._modeIs(Processor.Mode.RESULT);
         this._output();
     }
 
     __add() {
-        this._pushX();
+        this._save();
         this._x0 = this._y.plus(this._x);
         this._pop();
         this._x = this._x0;
@@ -316,7 +348,7 @@ var Processor = class Processor {
     }
 
     __subtract() {
-        this._pushX();
+        this._save();
         this._x0 = this._y.minus(this._x);
         this._pop();
         this._x = this._x0;
@@ -325,7 +357,7 @@ var Processor = class Processor {
     }
 
     __multiply() {
-        this._pushX();
+        this._save();
         this._x0 = this._y.times(this._x);
         this._pop();
         this._x = this._x0;
