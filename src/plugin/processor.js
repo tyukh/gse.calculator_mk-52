@@ -29,7 +29,7 @@ const Decimal = Me.imports.decimal.decimal;
 
 class Value {
     constructor() {
-        this._empty();
+        this.empty();
     }
 
     get mantissa() {
@@ -132,6 +132,8 @@ var Processor = class Processor {
         this._x1 = new Decimal.Decimal(0);
         this._x0 = new Decimal.Decimal(0);
 
+        this._actionsIs();
+
         this._number = new Value();
         this._modeIs(Processor.Mode.READY);
     }
@@ -173,6 +175,9 @@ var Processor = class Processor {
         MINUS: 31,
         MULTIPLY: 32,
         DIVIDE: 33,
+
+        CLEAR_F: 81,
+        NOP: 82,
 
         F: 90,
         K: 91,
@@ -243,6 +248,12 @@ var Processor = class Processor {
         this._x = this._x1;
     }
 
+    _swap() {
+        this._x0 = this._y;
+        this._y = this._x;
+        this._x = this._x0;
+    }
+
     _push() {
         this._t = this._z;
         this._z = this._y;
@@ -275,9 +286,10 @@ var Processor = class Processor {
             this._modeIs(Processor.Mode.FRACTION);
     }
 
-    _doDigit(value) {
+    _doDigit(lambda) {
+        let digit = lambda();
         if (this._isMode(Processor.Mode.EXPONENT)) {
-            this._number.exponentExtend(value);
+            this._number.exponentExtend(digit);
         } else {
             if (this._isMode(Processor.Mode.RESULT))
                 this._doPush();
@@ -288,10 +300,10 @@ var Processor = class Processor {
             if (!this._number.isMantissaFull()) {
                 switch (this._mode) {
                 case Processor.Mode.INTEGER:
-                    this._number.integerExtend(value);
+                    this._number.integerExtend(digit);
                     break;
                 case Processor.Mode.FRACTION:
-                    this._number.fractionExtend(value);
+                    this._number.fractionExtend(digit);
                     break;
                 }
             }
@@ -322,143 +334,134 @@ var Processor = class Processor {
         this._output();
     }
 
-    _doSwap() {
+    _doOp2(lambda) {
         this._save();
-        this._x0 = this._y;
-        this._y = this._x;
-        this._x = this._x0;
-        this._modeIs(Processor.Mode.RESULT);
-        this._output();
-    }
-
-    _doBackX() {
-        this._push();
-        this._restore();
-        this._modeIs(Processor.Mode.RESULT);
-        this._output();
-    }
-
-    __add() {
-        this._save();
-        this._x0 = this._y.plus(this._x);
+        this._x0 = lambda(this._y, this._x);
         this._pop();
         this._x = this._x0;
         this._modeIs(Processor.Mode.RESULT);
         this._output();
     }
 
-    __subtract() {
-        this._save();
-        this._x0 = this._y.minus(this._x);
-        this._pop();
-        this._x = this._x0;
+    _doOp0(lambda) {
+        lambda();
         this._modeIs(Processor.Mode.RESULT);
         this._output();
     }
 
-    __multiply() {
-        this._save();
-        this._x0 = this._y.times(this._x);
-        this._pop();
-        this._x = this._x0;
-        this._modeIs(Processor.Mode.RESULT);
-        this._output();
+    _doMode(lambda) {
+        this._modeIs(lambda());
+    }
+
+    _actionsIs() {
+        this._actions = new Map([
+            [Processor.Key.ZERO, {
+                action: this._doDigit.bind(this), lambda: () => '0',
+            }],
+            [Processor.Key.ONE, {
+                action: this._doDigit.bind(this), lambda: () => '1',
+            }],
+            [Processor.Key.TWO, {
+                action: this._doDigit.bind(this), lambda: () => '2',
+            }],
+            [Processor.Key.THREE, {
+                action: this._doDigit.bind(this), lambda: () => '3',
+            }],
+            [Processor.Key.FOUR, {
+                action: this._doDigit.bind(this), lambda: () => '4',
+            }],
+            [Processor.Key.FIVE, {
+                action: this._doDigit.bind(this), lambda: () => '5',
+            }],
+            [Processor.Key.SIX, {
+                action: this._doDigit.bind(this), lambda: () => '6',
+            }],
+            [Processor.Key.SEVEN, {
+                action: this._doDigit.bind(this), lambda: () => '7',
+            }],
+            [Processor.Key.EIGHT, {
+                action: this._doDigit.bind(this), lambda: () => '8',
+            }],
+            [Processor.Key.NINE, {
+                action: this._doDigit.bind(this), lambda: () => '9',
+            }],
+            [Processor.Key.POINT, {
+                action: this._doPoint.bind(this), lambda: null,
+            }],
+            [Processor.Key.ENTER_E, {
+                action: this._doEnterE.bind(this), lambda: null,
+            }],
+            [Processor.Key.SIGN, {
+                action: this._doNegate.bind(this), lambda: null,
+            }],
+            [Processor.Key.PUSH, {
+                action: this._doPush.bind(this), lambda: null,
+            }],
+            [Processor.Key.SWAP, {
+                action: this._doOp0.bind(this), lambda: () => {
+                    this._save();
+                    this._swap();
+                },
+            }],
+            [Processor.Key.BACK_X, {
+                action: this._doOp0.bind(this), lambda: () => {
+                    this._push();
+                    this._restore();
+                },
+            }],
+            [Processor.Key.CLEAR_X, {
+                action: this._doClearX.bind(this), lambda: null,
+            }],
+            [Processor.Key.PLUS, {
+                action: this._doOp2.bind(this), lambda: (y, x) => y.plus(x),
+            }],
+            [Processor.Key.MINUS, {
+                action: this._doOp2.bind(this), lambda: (y, x) => y.minus(x),
+            }],
+            [Processor.Key.MULTIPLY, {
+                action: this._doOp2.bind(this), lambda: (y, x) => y.times(x),
+            }],
+
+            [Processor.Key.CLEAR_F, {
+                action: this._doMode.bind(this), lambda: () => Processor.Mode.READY,
+            }],
+            [Processor.Key.NOP, {
+                action: this._doMode.bind(this), lambda: () => Processor.Mode.READY,
+            }],
+
+            [Processor.Key.F, {
+                action: this._doMode.bind(this), lambda: () => Processor.Mode.F,
+            }],
+            [Processor.Key.K, {
+                action: this._doMode.bind(this), lambda: () => Processor.Mode.K,
+            }],
+        ]);
+
+        this._translateF = new Map([
+            [Processor.Key.PUSH, Processor.Key.BACK_X],
+            [Processor.Key.CLEAR_X, Processor.Key.CLEAR_F],
+        ]);
+
+        this._translateK = new Map([
+            [Processor.Key.ZERO, Processor.Key.NOP],
+        ]);
     }
 
     keyPressed(key) {
-        if (this._isMode(Processor.Mode.F)) {
-            switch (key) {
-            case Processor.Key.PUSH:
-                key = Processor.Key.BACK_X;
-                break;
+        if (this._isMode(Processor.Mode.F))
+            key = this._translateF.get(key);
+        if (this._isMode(Processor.Mode.K))
+            key = this._translateK.get(key);
 
-            case Processor.Key.CLEAR_X:
-                this._modeIs(Processor.Mode.READY);
-                break;
+        if (key === undefined)
+            return;
 
-            default:
-                return;
-            }
-        }
-
-        if (this._isMode(Processor.Mode.K)) {
-            switch (key) {
-            case Processor.Key.ZERO:
-                this._modeIs(Processor.Mode.READY);
-                break;
-
-            default:
-                return;
-            }
-        }
-
-        switch (key) {
-        case Processor.Key.ZERO:
-        case Processor.Key.ONE:
-        case Processor.Key.TWO:
-        case Processor.Key.THREE:
-        case Processor.Key.FOUR:
-        case Processor.Key.FIVE:
-        case Processor.Key.SIX:
-        case Processor.Key.SEVEN:
-        case Processor.Key.EIGHT:
-        case Processor.Key.NINE:
-            this._doDigit(key);
-            break;
-
-        case Processor.Key.POINT:
-            this._doPoint();
-            break;
-
-        case Processor.Key.ENTER_E:
-            this._doEnterE();
-            break;
-
-        case Processor.Key.PLUS:
-            this.__add();
-            break;
-
-        case Processor.Key.MINUS:
-            this.__subtract();
-            break;
-
-        case Processor.Key.MULTIPLY:
-            this.__multiply();
-            break;
-
-        case Processor.Key.DIVIDE:
-
-            break;
-
-        case Processor.Key.SIGN:
-            this._doNegate();
-            break;
-
-        case Processor.Key.PUSH:
-            this._doPush();
-            break;
-
-        case Processor.Key.SWAP:
-            this._doSwap();
-            break;
-
-        case Processor.Key.BACK_X:
-            this._doBackX();
-            break;
-
-        case Processor.Key.CLEAR_X:
-            this._doClearX();
-            break;
-
-        case Processor.Key.F:
-            this._modeIs(Processor.Mode.F);
-            break;
-
-        case Processor.Key.K:
-            this._modeIs(Processor.Mode.K);
-            break;
-
-        default:
-        }
+        let action = this._actions.get(key);
+        if (action === undefined)
+            return;
+        if (action.lambda === null)
+            action.action();
+        else
+            action.action(action.lambda);
     }
 };
