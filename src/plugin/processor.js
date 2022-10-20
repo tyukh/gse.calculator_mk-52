@@ -254,7 +254,7 @@ var Processor = class Processor {
         // this._t = Decimal.Decimal(0); prototype calculator error?
     }
 
-    _doEnterE() {
+    _doEnterE() { // "+72.453E-30".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(\+|-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,30,
         if (this._x.isZero()) { // 1. +00? 2. x0/x
             this._number.empty();
             this._modeIs(Processor.Mode.INTEGER);
