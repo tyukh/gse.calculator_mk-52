@@ -51,7 +51,7 @@ class Value {
         this._integer = defined(parts[2], '', part => part);
         this._fraction = defined(parts[3], '', part => part);
         this._exponentSign = defined(parts[4], '', part => part === '-' ? '-' : '');
-        this._exponent = defined(parts[5], '', part => part);
+        this._exponent = defined(parts[5], '', part => part.padStart(Processor.Precision.MAX_E, '0'));
     }
 
     toDecimal() {
@@ -70,8 +70,8 @@ class Value {
     }
 
     pad() {
-        if (this._exponent.length === 0)
-            this._exponent = ''.padStart(Processor.Precision.MAX_E, '0');
+        this._exponentSign = '';
+        this._exponent = ''.padStart(Processor.Precision.MAX_E, '0');
     }
 
     isInteger() {
@@ -255,8 +255,8 @@ var Processor = class Processor {
         // this._t = Decimal.Decimal(0); prototype calculator error?
     }
 
-    _doEnterE() { // "-123.456E-01".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(?:\+)?(\-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,1,
-        if (this._x.isZero()) { // 1. +00? 2. x0/x
+    _doEnterE() {
+        if (this._x.isZero()) {
             this._number.empty();
             this._modeIs(Processor.Mode.INTEGER);
             this._doDigit(Processor.Key.ONE);
@@ -276,7 +276,7 @@ var Processor = class Processor {
 
     _doDigit(lambda) {
         let digit = lambda();
-        if (this._isMode(Processor.Mode.EXPONENT)) {
+        if (this._isMode(Processor.Mode.EXPONENT)) { // "-123.456E-01".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(?:\+)?(\-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,1,
             this._number.exponentExtend(digit);
         } else {
             if (this._isMode(Processor.Mode.RESULT))
