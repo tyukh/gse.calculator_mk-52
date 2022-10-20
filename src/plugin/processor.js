@@ -43,28 +43,15 @@ class Value {
         return `${exponent}`;
     }
 
-    fromDecimal(value) {
+    fromDecimal(value) { // .split(/(\+|-)?(\d+)(?:\.)?(\d+)?(?:e|E)?(\+|-)?(\d+)?/).toString()); JS LOG: ,-,123,456,+,78,
         this.empty();
-        let eParts = value.valueOf().split('e');
-        let mParts = eParts[0].split('.');
-        let mSign = mParts[0].indexOf('-');
-        if (mSign === -1) {
-            this._integer = mParts[0];
-        } else {
-            this._mantissaSign = '-';
-            this._integer = mParts[0].slice(mSign + 1);
-        }
-        if (mParts.length > 1)
-            this._fraction = mParts[1];
-        if (eParts.length > 1) {
-            let eSign = eParts[1].indexOf('-');
-            if (eSign === -1) {
-                this._exponent = eParts[1];
-            } else {
-                this._exponentSign = '-';
-                this._exponent = eParts[1].slice(eSign + 1);
-            }
-        }
+        let parts = value.valueOf().split(/(\+|-)?(\d+)(?:\.)?(\d+)?(?:e|E)?(\+|-)?(\d+)?/);
+        const defined = (item, no, yes) => item === undefined ? no : yes(item);
+        this._mantissaSign = defined(parts[1], '', part => part === '-' ? '-' : '');
+        this._integer = defined(parts[2], '', part => part);
+        this._fraction = defined(parts[3], '', part => part);
+        this._exponentSign = defined(parts[4], '', part => part === '-' ? '-' : '');
+        this._exponent = defined(parts[5], '', part => part);
     }
 
     toDecimal() {
@@ -268,7 +255,7 @@ var Processor = class Processor {
     }
 
     _doEnterE() {
-        if (this._x.isZero()) {
+        if (this._x.isZero()) { // 1. +00? 2. x0/x
             this._number.empty();
             this._modeIs(Processor.Mode.INTEGER);
             this._doDigit(Processor.Key.ONE);
