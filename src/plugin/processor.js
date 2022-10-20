@@ -232,7 +232,8 @@ var Processor = class Processor {
     }
 
     _restore() {
-        this._x = this._x1;
+        this._x0 = this._x1;
+        this._x = this._x0;
     }
 
     _swap() {
@@ -254,7 +255,7 @@ var Processor = class Processor {
         // this._t = Decimal.Decimal(0); prototype calculator error?
     }
 
-    _doEnterE() { // "+72.453E-30".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(\+|-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,30,
+    _doEnterE() { // "-123.456E-01".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(?:\+)?(\-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,1,
         if (this._x.isZero()) { // 1. +00? 2. x0/x
             this._number.empty();
             this._modeIs(Processor.Mode.INTEGER);
@@ -303,14 +304,16 @@ var Processor = class Processor {
             this._number.exponentNegate();
             this._input();
         } else {
-            this._x = this._x.neg();
+            this._x0 = this._x.neg();
+            this._x = this._x0;
             this._modeIs(Processor.Mode.READY);
             this._output();
         }
     }
 
     _doClearX() {
-        this._x = Decimal.Decimal(0);
+        this._x0 = Decimal.Decimal(0);
+        this._x = this._x0;
         this._modeIs(Processor.Mode.READY);
         this._output();
     }
@@ -323,7 +326,7 @@ var Processor = class Processor {
 
     _doOp2(lambda) {
         this._save();
-        this._x0 = lambda(this._y, this._x);
+        this._x0 = lambda();
         this._pop();
         this._x = this._x0;
         this._modeIs(Processor.Mode.RESULT);
@@ -400,13 +403,13 @@ var Processor = class Processor {
                 action: this._doClearX.bind(this), lambda: null,
             }],
             [Processor.Key.PLUS, {
-                action: this._doOp2.bind(this), lambda: (y, x) => y.plus(x),
+                action: this._doOp2.bind(this), lambda: () => this._y.plus(this._x),
             }],
             [Processor.Key.MINUS, {
-                action: this._doOp2.bind(this), lambda: (y, x) => y.minus(x),
+                action: this._doOp2.bind(this), lambda: () => this._y.minus(this._x),
             }],
             [Processor.Key.MULTIPLY, {
-                action: this._doOp2.bind(this), lambda: (y, x) => y.times(x),
+                action: this._doOp2.bind(this), lambda: () => this._y.times(this._x),
             }],
 
             [Processor.Key.CLEAR_F, {
