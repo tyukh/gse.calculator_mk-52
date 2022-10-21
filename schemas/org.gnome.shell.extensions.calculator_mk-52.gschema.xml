@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE schemalist SYSTEM "gschema.dtd">
 <schemalist>
-  <enum id="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-position">
+  <enum id="org.gnome.shell.extensions.calculator_mk-52.enum-launcher-position">
     <value value="0" nick="first"/>    
     <value value="-1" nick="last"/>    
   </enum>
-  <schema id="org.gnome.shell.extensions.gse.panel-calc-rpn" path="/org/gnome/shell/extensions/gse.panel-calc-rpn/">
+  <schema id="org.gnome.shell.extensions.calculator_mk-52" path="/org/gnome/shell/extensions/calculator_mk-52/">
     <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
     <key name="font" type="s">
       <default>"Cantarell"</default>
@@ -18,7 +18,7 @@
       </choices>
       <default>"center"</default>
     </key>
-    <key name="launcher-position" enum="org.gnome.shell.extensions.gse.panel-calc-rpn.enum-launcher-position">
+    <key name="launcher-position" enum="org.gnome.shell.extensions.calculator_mk-52.enum-launcher-position">
       <default>"last"</default>
     </key>
     <key name="original-mode" type="b">

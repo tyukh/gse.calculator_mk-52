@@ -1,13 +1,13 @@
 {
   "name": "Panel Calculator (RPN)",
   "description": "Calculator on panel with reverse polish notation",
-  "uuid": "gse.panel-calc-rpn@tyukh.github.io",
+  "uuid": "calculator_mk-52@tyukh.github.io",
   "version": 1,
   "shell-version": [
     "42", "43"
   ],
-  "url": "https://github.com/tyukh/gse.panel-calc-rpn-tyukh.github.io",
+  "url": "https://github.com/tyukh/gse.calculator_mk-52",
   "session-modes": ["user", "unlock-dialog"],
-  "gettext-domain": "gse.panel-calc-rpn@tyukh.github.io",
-  "settings-schema": "org.gnome.shell.extensions.gse.panel-calc-rpn"
+  "gettext-domain": "calculator_mk-52@tyukh.github.io",
+  "settings-schema": "org.gnome.shell.extensions.calculator_mk-52"
 }

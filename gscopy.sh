@@ -1,3 +1,3 @@
 #!/bin/bash
-rsync -m --archive --mkpath --include='decimal/*.js' --include='decimal/*.md' --include='ui/*.ui' --include='schemas/*.compiled' --include='*/' --exclude='*' ./ ~/.local/share/gnome-shell/extensions/gse.panel-calc-rpn@tyukh.github.io/
-rsync -m --archive --mkpath --include='*.js' --include='*.css' --include='*.json' --include='*/' --exclude='*' ./src/ ~/.local/share/gnome-shell/extensions/gse.panel-calc-rpn@tyukh.github.io/
+rsync -m --archive --mkpath --include='decimal/*.js' --include='decimal/*.md' --include='ui/*.ui' --include='schemas/*.compiled' --include='*/' --exclude='*' ./ ~/.local/share/gnome-shell/extensions/calculator_mk-52@tyukh.github.io/
+rsync -m --archive --mkpath --include='*.js' --include='*.css' --include='*.json' --include='*/' --exclude='*' ./src/ ~/.local/share/gnome-shell/extensions/calculator_mk-52@tyukh.github.io/
