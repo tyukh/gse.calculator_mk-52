@@ -43,15 +43,23 @@ class Value {
         return `${exponent}`;
     }
 
-    fromDecimal(value) { // .split(/(\+|-)?(\d+)(?:\.)?(\d+)?(?:e|E)?(\+|-)?(\d+)?/).toString()); JS LOG: ,-,123,456,+,78,
-        this.empty();
-        let parts = value.valueOf().split(/(\+|-)?(\d+)(?:\.)?(\d+)?(?:e|E)?(\+|-)?(\d+)?/);
+    set exponent(value) {
+        let part = value.match(/(?<exponentSign>\+|-)?(?<exponent>\d+)/).groups;
         const defined = (item, no, yes) => item === undefined ? no : yes(item);
-        this._mantissaSign = defined(parts[1], '', part => part === '-' ? '-' : '');
-        this._integer = defined(parts[2], '', part => part);
-        this._fraction = defined(parts[3], '', part => part);
-        this._exponentSign = defined(parts[4], '', part => part === '-' ? '-' : '');
-        this._exponent = defined(parts[5], '', part => part.padStart(Processor.Precision.MAX_E, '0'));
+        this._exponentSign = defined(part.exponentSign, '', item => item === '-' ? '-' : '');
+        this._exponent = defined(part.exponent, ''.padStart(Processor.Precision.MAX_E, '0'), item => item.padStart(Processor.Precision.MAX_E, '0'));
+    }
+
+    fromDecimal(value) {
+        this.empty();
+        let part = value.valueOf().match(/(?<mantissaSign>\+|-)?(?<integer>\d+)(?:\.)?(?<fraction>\d+)?(?:e|E)?(?<exponentSign>\+|-)?(?<exponent>\d+)?/).groups;
+        const defined = (item, no, yes) => item === undefined ? no : yes(item);
+        this._mantissaSign = defined(part.mantissaSign, '', item => item === '-' ? '-' : '');
+        this._integer = defined(part.integer, '', item => item);
+        this._fraction = defined(part.fraction, '', item => item);
+        this._exponentSign = defined(part.exponentSign, '', item => item === '-' ? '-' : '');
+        this._exponent = defined(part.exponent, '', item => item.padStart(Processor.Precision.MAX_E, '0'));
+        return this;
     }
 
     toDecimal() {
@@ -72,6 +80,11 @@ class Value {
     pad() {
         this._exponentSign = '';
         this._exponent = ''.padStart(Processor.Precision.MAX_E, '0');
+    }
+
+    defaults() {
+        this._integer = `1${this._integer.slice(1)}`;
+        this._fraction = '';
     }
 
     isInteger() {
@@ -116,8 +129,8 @@ var Processor = class Processor {
         this._y = new Decimal.Decimal(0);
         this._z = new Decimal.Decimal(0);
         this._t = new Decimal.Decimal(0);
-        this._x1 = new Decimal.Decimal(0);
-        this._x0 = new Decimal.Decimal(0);
+        this._x1 = new Decimal.Decimal(0); // previous x value
+        this._x0 = new Decimal.Decimal(0); // x value before _doOps not _setOps
 
         this._actionsIs();
 
@@ -227,57 +240,33 @@ var Processor = class Processor {
         this._display();
     }
 
-    _save() {
-        this._x1 = this._x;
-    }
-
-    _restore() {
-        this._x0 = this._x1;
-        this._x = this._x0;
-    }
-
-    _swap() {
-        this._x0 = this._y;
-        this._y = this._x;
-        this._x = this._x0;
-    }
-
-    _push() {
-        this._t = this._z;
-        this._z = this._y;
-        this._y = this._x;
-    }
-
-    _pop() {
-        this._x = this._y;
-        this._y = this._z;
-        this._z = this._t;
-        // this._t = Decimal.Decimal(0); prototype calculator error?
-    }
-
-    _doEnterE() {
-        if (this._x.isZero()) {
-            this._number.empty();
-            this._modeIs(Processor.Mode.INTEGER);
-            this._doDigit(Processor.Key.ONE);
-        }
-        this._number.pad();
-        this._modeIs(Processor.Mode.EXPONENT);
+    _setMode(lambda) {
+        this._modeIs(lambda());
         this._input();
     }
 
-    _doPoint() {
+    _setPoint() {
         if (this._isMode(Processor.Mode.EXPONENT))
             this._modeIs(Processor.Mode.ERROR);
         else
         if (this._number.isInteger())
             this._modeIs(Processor.Mode.FRACTION);
+        this._input();
     }
 
-    _doDigit(lambda) {
+    _setDigit(lambda) {
         let digit = lambda();
-        if (this._isMode(Processor.Mode.EXPONENT)) { // "-123.456E-01".split(/(?:\+|-)?(?:\d+)(?:\.)?(?:\d+)?(?:e|E)?(?:\+)?(\-)?(?:0*([1-9][0-9]*|0))?/).toString() JS LOG: ,-,1,
+        if (this._isMode(Processor.Mode.EXPONENT)) {
             this._number.exponentExtend(digit);
+            let value = new Value().fromDecimal(this._x0);
+            let exponent = parseInt(this._number.exponent) + parseInt(value.exponent.length === 0 ? '0' : value.exponent);
+            if ((exponent > Processor.Precision.MAX_E_VALUE) || (exponent < Processor.Precision.MIN_E_VALUE)) {
+                this._modeIs(Processor.Mode.ERROR);
+            } else {
+                value.exponent = exponent.toString();
+                this._x = value.toDecimal();
+            }
+            this._display();
         } else {
             if (this._isMode(Processor.Mode.RESULT))
                 this._doPush();
@@ -295,8 +284,18 @@ var Processor = class Processor {
                     break;
                 }
             }
+            this._input();
         }
+    }
+
+    _setEnterE() {
+        if (this._x.isZero())
+            this._number.defaults();
+
+        this._number.pad();
+        this._modeIs(Processor.Mode.EXPONENT);
         this._input();
+        this._x0 = this._x;
     }
 
     _doNegate() {
@@ -304,126 +303,144 @@ var Processor = class Processor {
             this._number.exponentNegate();
             this._input();
         } else {
-            this._x0 = this._x.neg();
-            this._x = this._x0;
+            this._x0 = this._x;
+            this._x = this._x.neg();
             this._modeIs(Processor.Mode.READY);
             this._output();
         }
     }
 
-    _doClearX() {
-        this._x0 = Decimal.Decimal(0);
-        this._x = this._x0;
-        this._modeIs(Processor.Mode.READY);
-        this._output();
-    }
-
-    _doPush() {
-        this._push();
-        this._modeIs(Processor.Mode.READY);
+    _doOp0(lambda) {
+        this._x0 = this._x;
+        this._modeIs(lambda());
         this._output();
     }
 
     _doOp2(lambda) {
-        this._save();
-        this._x0 = lambda();
-        this._pop();
-        this._x = this._x0;
-        this._modeIs(Processor.Mode.RESULT);
-        this._output();
-    }
-
-    _doOp0(lambda) {
-        lambda();
-        this._modeIs(Processor.Mode.RESULT);
-        this._output();
-    }
-
-    _doMode(lambda) {
+        this._x0 = this._x;
+        this._x1 = this._x;
         this._modeIs(lambda());
+        if (this._isMode(Processor.Mode.RESULT)) {
+            this._y = this._z;
+            this._z = this._t;
+            // this._t = Decimal.Decimal(0); prototype calculator error?
+        }
+        this._output();
     }
 
     _actionsIs() {
         this._actions = new Map([
+            // Grey keys
             [Processor.Key.ZERO, {
-                action: this._doDigit.bind(this), lambda: () => '0',
+                action: this._setDigit.bind(this), lambda: () => '0',
             }],
             [Processor.Key.ONE, {
-                action: this._doDigit.bind(this), lambda: () => '1',
+                action: this._setDigit.bind(this), lambda: () => '1',
             }],
             [Processor.Key.TWO, {
-                action: this._doDigit.bind(this), lambda: () => '2',
+                action: this._setDigit.bind(this), lambda: () => '2',
             }],
             [Processor.Key.THREE, {
-                action: this._doDigit.bind(this), lambda: () => '3',
+                action: this._setDigit.bind(this), lambda: () => '3',
             }],
             [Processor.Key.FOUR, {
-                action: this._doDigit.bind(this), lambda: () => '4',
+                action: this._setDigit.bind(this), lambda: () => '4',
             }],
             [Processor.Key.FIVE, {
-                action: this._doDigit.bind(this), lambda: () => '5',
+                action: this._setDigit.bind(this), lambda: () => '5',
             }],
             [Processor.Key.SIX, {
-                action: this._doDigit.bind(this), lambda: () => '6',
+                action: this._setDigit.bind(this), lambda: () => '6',
             }],
             [Processor.Key.SEVEN, {
-                action: this._doDigit.bind(this), lambda: () => '7',
+                action: this._setDigit.bind(this), lambda: () => '7',
             }],
             [Processor.Key.EIGHT, {
-                action: this._doDigit.bind(this), lambda: () => '8',
+                action: this._setDigit.bind(this), lambda: () => '8',
             }],
             [Processor.Key.NINE, {
-                action: this._doDigit.bind(this), lambda: () => '9',
+                action: this._setDigit.bind(this), lambda: () => '9',
             }],
             [Processor.Key.POINT, {
-                action: this._doPoint.bind(this), lambda: null,
+                action: this._setPoint.bind(this), lambda: null,
             }],
             [Processor.Key.ENTER_E, {
-                action: this._doEnterE.bind(this), lambda: null,
+                action: this._setEnterE.bind(this), lambda: null,
             }],
             [Processor.Key.SIGN, {
                 action: this._doNegate.bind(this), lambda: null,
             }],
             [Processor.Key.PUSH, {
-                action: this._doPush.bind(this), lambda: null,
+                action: this._doOp0.bind(this), lambda: () => {
+                    this._t = this._z;
+                    this._z = this._y;
+                    this._y = this._x;
+                    return Processor.Mode.READY;
+                },
             }],
             [Processor.Key.SWAP, {
                 action: this._doOp0.bind(this), lambda: () => {
-                    this._save();
-                    this._swap();
+                    this._x1 = this._x;
+                    this._x = this._y;
+                    this._y = this._x1;
+                    return Processor.Mode.RESULT;
                 },
             }],
             [Processor.Key.BACK_X, {
                 action: this._doOp0.bind(this), lambda: () => {
-                    this._push();
-                    this._restore();
+                    this._t = this._z;
+                    this._z = this._y;
+                    this._y = this._x;
+                    this._x = this._x1;
+                    return Processor.Mode.RESULT;
                 },
             }],
-            [Processor.Key.CLEAR_X, {
-                action: this._doClearX.bind(this), lambda: null,
-            }],
             [Processor.Key.PLUS, {
-                action: this._doOp2.bind(this), lambda: () => this._y.plus(this._x),
+                action: this._doOp2.bind(this), lambda: () => {
+                    this._x = this._y.plus(this._x);
+                    return Processor.Mode.RESULT;
+                },
             }],
             [Processor.Key.MINUS, {
-                action: this._doOp2.bind(this), lambda: () => this._y.minus(this._x),
+                action: this._doOp2.bind(this), lambda: () => {
+                    this._x = this._y.minus(this._x);
+                    return Processor.Mode.RESULT;
+                },
             }],
             [Processor.Key.MULTIPLY, {
-                action: this._doOp2.bind(this), lambda: () => this._y.times(this._x),
+                action: this._doOp2.bind(this), lambda: () => {
+                    this._x = this._y.times(this._x);
+                    return Processor.Mode.RESULT;
+                },
             }],
-
+            [Processor.Key.DIVIDE, {
+                action: this._doOp2.bind(this), lambda: () => {
+                    if (this._x.isZero())
+                        return Processor.Mode.ERROR;
+                    this._x = this._y.div(this._x);
+                    return Processor.Mode.RESULT;
+                },
+            }],
+            // Red keys
+            [Processor.Key.CLEAR_X, {
+                action: this._doOp0.bind(this), lambda: () => {
+                    this._x = Decimal.Decimal(0);
+                    return Processor.Mode.READY;
+                },
+            }],
+            // Yellow keys
             [Processor.Key.CLEAR_F, {
-                action: this._doMode.bind(this), lambda: () => Processor.Mode.READY,
+                action: this._setMode.bind(this), lambda: () => Processor.Mode.READY,
+            }],
+            [Processor.Key.F, {
+                action: this._setMode.bind(this), lambda: () => Processor.Mode.F,
+            }],
+            // Blue keys
+            [Processor.Key.K, {
+                action: this._setMode.bind(this), lambda: () => Processor.Mode.K,
             }],
             [Processor.Key.NOP, {
-                action: this._doMode.bind(this), lambda: () => Processor.Mode.READY,
-            }],
-
-            [Processor.Key.F, {
-                action: this._doMode.bind(this), lambda: () => Processor.Mode.F,
-            }],
-            [Processor.Key.K, {
-                action: this._doMode.bind(this), lambda: () => Processor.Mode.K,
+                action: this._setMode.bind(this), lambda: () => Processor.Mode.READY,
             }],
         ]);
 

@@ -1,6 +1,6 @@
 {
-  "name": "Panel Calculator (RPN)",
-  "description": "Calculator on panel with reverse polish notation",
+  "name": "Calculator mk-52",
+  "description": "Calculator with reverse polish notation",
   "uuid": "calculator_mk-52@tyukh.github.io",
   "version": 1,
   "shell-version": [
